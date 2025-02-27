@@ -1,0 +1,130 @@
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+
+namespace POS.Entities
+{
+    public class MySQLiteContext : DbContext
+    {
+        public MySQLiteContext(DbContextOptions<MySQLiteContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Category> Category { get; set; }
+        public DbSet<CategoryLog> CategoryLog { get; set; }
+        public DbSet<Inventory> Inventory { get; set; }
+        public DbSet<Product> Product { get; set; }
+        public DbSet<ProductLog> LogProduct { get; set; }
+        public DbSet<Sales> Sales { get; set; }
+        public DbSet<SalesDetail> SalesDetail { get; set; }
+        public DbSet<Warehouse> Warehouse { get; set; }
+        public DbSet<WarehouseLocation> WarehouseLocation { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.IdCategory);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<CategoryLog>(entity =>
+            {
+                entity.HasKey(e => new { e.IdMovement, e.IdCategory, e.Name });
+                entity.Property(e => e.IdMovement).IsRequired();
+                entity.Property(e => e.IdCategory).IsRequired();
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(e => e.IdProduct);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.IdCategory).IsRequired();
+                entity.Property(e => e.Price).IsRequired();
+                entity.Property(e => e.MeasureUnit).IsRequired();
+                entity.Property(e => e.UrlImage).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.CreateUser).IsRequired();
+                entity.Property(e => e.CreateDate).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<ProductLog>(entity =>
+            {
+                entity.HasKey(e => new { e.IdMovement, e.IdProduct, e.Name, e.IdCategory });
+                entity.Property(e => e.IdMovement).IsRequired();
+                entity.Property(e => e.IdProduct).IsRequired();
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.IdCategory).IsRequired();
+                entity.Property(e => e.Price).IsRequired();
+                entity.Property(e => e.MeasureUnit).IsRequired();
+                entity.Property(e => e.UrlImage).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<Warehouse>(entity =>
+            {
+                entity.HasKey(e => e.IdWarehouse);
+                entity.Property(e => e.IdWarehouseLocation).IsRequired();
+                entity.Property(e => e.IdCategory).IsRequired();
+                entity.Property(e => e.IdProduct).IsRequired();
+                entity.Property(e => e.Stock).IsRequired();
+                entity.Property(e => e.CreateUser).IsRequired();
+                entity.Property(e => e.CreateDate).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<WarehouseLocation>(entity =>
+            {
+                entity.HasKey(e => e.IdWarehouseLocation);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Address).IsRequired();
+            });
+
+            modelBuilder.Entity<Inventory>(entity =>
+            {
+                entity.HasKey(e => e.IdMovement);
+                entity.Property(e => e.IdProduct).IsRequired();
+                entity.Property(e => e.MovementType).IsRequired();
+                entity.Property(e => e.Quantity).IsRequired();
+                entity.Property(e => e.MovementUser).IsRequired();
+                entity.Property(e => e.MovementDate).IsRequired();
+            });
+
+            modelBuilder.Entity<Sales>(entity =>
+            {
+                entity.HasKey(e => e.IdSales);
+                entity.Property(e => e.SalesDate).IsRequired();
+                entity.Property(e => e.Total).IsRequired();
+                entity.Property(e => e.CreateUser).IsRequired();
+                entity.Property(e => e.CreateDate).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+
+            modelBuilder.Entity<SalesDetail>(entity =>
+            {
+                entity.HasKey(e => e.IdSalesDetail);
+                entity.Property(e => e.IdSales).IsRequired();
+                entity.Property(e => e.IdProduct).IsRequired();
+                entity.Property(e => e.Quantity).IsRequired();
+                entity.Property(e => e.Subtotal).IsRequired();
+                entity.Property(e => e.CreateUser).IsRequired();
+                entity.Property(e => e.CreateDate).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
+            });
+        }
+    }
+}
