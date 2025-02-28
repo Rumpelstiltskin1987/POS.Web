@@ -8,20 +8,21 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.EntityFrameworkCore;
 using POS.Interfaces;
 using POS.Entities;
+using System.Linq.Expressions;
 
 namespace POS.Core
 {
     public class CoreCategory : BaseCore, ICategory
     {
-        public CoreCategory(MySQLiteContext context) 
-            : base(context) 
-        { 
+        public CoreCategory(MySQLiteContext context)
+            : base(context)
+        {
         }
 
         public void Add(Category category)
         {
             try
-            {                
+            {
                 _contextConnection.Add(category);
 
                 _contextConnection.SaveChanges();
@@ -41,7 +42,7 @@ namespace POS.Core
                 _contextConnection.Category
                     .Remove(new Category { IdCategory = id });
 
-                _contextConnection.SaveChanges(); 
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -49,33 +50,31 @@ namespace POS.Core
             }
         }
 
-        public IEnumerable<Category> GetAllActive()
+        public IEnumerable<Category> GetAll(string status)
         {
             IEnumerable<Category> categories = new List<Category>();
 
             try
             {
-                categories = _contextConnection.Category
-                    .Where(x => x.Status == "AC")
-                    .ToList();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                switch (status)
+                {
+                    case "AC":
+                        categories = _contextConnection.Category
+                            .Where(x => x.Status == "AC")
+                            .ToList();
+                        break;
 
-            return categories;    
-        }
+                    case "IN":
+                        categories = _contextConnection.Category
+                            .Where(x => x.Status == "IN")
+                            .ToList();
+                        break;
 
-        public IEnumerable<Category> GetAllInactive()
-        {
-            IEnumerable<Category> categories = new List<Category>();
-
-            try
-            {
-                categories = _contextConnection.Category
-                    .Where(x => x.Status == "IN")
-                    .ToList();
+                    default:
+                        categories = _contextConnection.Category
+                            .ToList();
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -84,7 +83,6 @@ namespace POS.Core
 
             return categories;
         }
-
         public Category GetById(int id)
         {
             Category category = new Category();

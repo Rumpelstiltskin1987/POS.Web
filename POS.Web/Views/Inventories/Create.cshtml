@@ -1,30 +1,29 @@
 ﻿@model POS.Entities.Inventory
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Alta";
 }
 
-<h1>Create</h1>
+<h1>Alta de movimientos</h1>
 
-<h4>Inventory</h4>
+<h4>Inventario</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="IdMovement" class="control-label"></label>
-                <input asp-for="IdMovement" class="form-control" />
-                <span asp-validation-for="IdMovement" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdStock" class="control-label"></label>
-                <input asp-for="IdStock" class="form-control" />
+                <label asp-for="IdStock" class="control-label">Stock</label>
+                <select asp-for="IdStock" class="form-control" asp-items="ViewBag.Stock">
+                    <option value="">Seleccione un stock</option>
+                </select>
                 <span asp-validation-for="IdStock" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MovementType" class="control-label"></label>
-                <input asp-for="MovementType" class="form-control" />
+                <label asp-for="MovementType" class="control-label">Tipo de Movimiento</label>
+                <select asp-for="MovementType" class="form-control" asp-items="ViewBag.MovementType">
+                    <option value="">Seleccione una tipo</option>
+                </select>
                 <span asp-validation-for="MovementType" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -38,17 +37,8 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MovementUser" class="control-label"></label>
-                <input asp-for="MovementUser" class="form-control" />
-                <span asp-validation-for="MovementUser" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MovementDate" class="control-label"></label>
-                <input asp-for="MovementDate" class="form-control" />
-                <span asp-validation-for="MovementDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Agregar" class="btn btn-primary" />
+                <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
             </div>
         </form>
     </div>

@@ -7,7 +7,7 @@
 <h1>Lista de Ubicaciones</h1>
 
 <p>
-    <a class="btn btn-secondary" asp-action="Create">Agregar Ubicación</a> |
+    <a class="btn btn-secondary" asp-action="Create">Agregar Ubicación</a>
     <a class="btn btn-secondary" asp-controller="Warehouses" asp-action="Index">Almacenes</a>
 </p>
 <table class="table">
@@ -26,8 +26,8 @@
                 @Html.DisplayFor(modelItem => item.Address)
             </td>
             <td>
-                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.IdWL">Editar</a> |
-                <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.IdWL">Detalles</a> |
+                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.IdWL">Editar</a>
+                <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.IdWL">Detalles</a>
                 <a class="btn btn-warning" asp-action="Inactivate" asp-route-id="@item.IdWL">Inactivar</a>
             </td>
         </tr>

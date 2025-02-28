@@ -83,7 +83,7 @@ namespace POS.Web.Controllers
         // GET: Productos/Create
         public IActionResult Create()
         {
-            var categories = _manageCategory.GetAllActive()
+            var categories = _manageCategory.GetAll("AC")
                 .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
                 .ToList();
 
@@ -135,7 +135,7 @@ namespace POS.Web.Controllers
             }
             else
             {
-                var categories = _manageCategory.GetAllActive()
+                var categories = _manageCategory.GetAll("AC")
                 .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
                 .ToList();
 

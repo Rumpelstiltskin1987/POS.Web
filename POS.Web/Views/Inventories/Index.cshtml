@@ -4,56 +4,69 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Movimientos de Inventario</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-secondary" asp-action="Create">Agragar movimiento de inventario</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.MovementType)
+                Imagen
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Quantity)
+                Stock
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                Movimiento
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MovementUser)
+                Cantidad
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MovementDate)
+                Descripción
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.MovementType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MovementUser)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MovementDate)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <img src="@item.Stock.Product.UrlImage" alt="Imagen de @item.Stock.Product.UrlImage" style="width: 40px; height: auto;" />
+                </td>
+                <td>
+                    @item.Stock.Product.Name / @item.Stock.Product.Description
+                </td>
+                <td>
+                    @if (item.MovementType == "EN")
+                    {
+                        @:Entrada
+                    }
+                    else if (item.MovementType == "SA")
+                    {
+                        @:Salida
+                    }
+                    else if (item.MovementType == "AJ")
+                    {
+                        @:Ajuste
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @* @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }, new { @class = "btn btn-primary" }) *@
+                    @Html.ActionLink("Detalles", "Details", new { IdStock = item.IdStock, IdMovement = item.IdMovement }, new { @class = "btn btn-primary" })
+                    @* @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ }) *@
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

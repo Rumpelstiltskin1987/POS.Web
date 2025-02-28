@@ -85,27 +85,11 @@ namespace POS.Business
             }                
         }
 
-        public IEnumerable<Category> GetAllActive()
+        public IEnumerable<Category> GetAll(string status)
         {
             try
             {
-                return _category.GetAllActive();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                _category.Dispose();
-            }
-        }
-
-        public IEnumerable<Category> GetAllInactive()
-        {
-            try
-            {
-                return _category.GetAllInactive();
+                return _category.GetAll(status);
             }
             catch (Exception ex)
             {

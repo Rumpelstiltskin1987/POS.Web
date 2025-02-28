@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using POS.Entities;
+using POS.Interfaces;
 
 namespace POS.Web.Controllers
 {
@@ -21,19 +22,23 @@ namespace POS.Web.Controllers
         // GET: Inventories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Inventory.ToListAsync());
+            return View(await _context.Inventory
+                .Include(c => c.Stock)
+                .Include(c => c.Stock.Warehouse)    
+                .Include(c => c.Stock.Product)
+                .ToListAsync());
         }
 
         // GET: Inventories/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? idStock, int? idMovement)
         {
-            if (id == null)
+            if (idStock == null)
             {
                 return NotFound();
             }
 
             var inventory = await _context.Inventory
-                .FirstOrDefaultAsync(m => m.IdMovement == id);
+                .FirstOrDefaultAsync(m => m.IdStock == idStock && m.IdMovement == idMovement);
             if (inventory == null)
             {
                 return NotFound();
@@ -45,6 +50,27 @@ namespace POS.Web.Controllers
         // GET: Inventories/Create
         public IActionResult Create()
         {
+            var stock = _context.Stock.Include(s => s.Product).ToList();
+
+            var stockList = stock
+                .Where(c => c.Product != null) // Evita productos nulos
+                .Select(c => new SelectListItem
+                {
+                    Value = c.IdStock.ToString(),
+                    Text = $"{c.Product.Name} / {c.Product.Description}"
+                })
+                .ToList();
+
+            var MovementType = new SelectList(new[]
+            {
+                new { Value = "EN", Text = "Entrada" },
+                new { Value = "SA", Text = "Salida" },
+                new { Value = "AJ", Text = "Ajuste" }
+            }, "Value", "Text");
+
+            ViewData["MovementType"] = MovementType;
+            ViewData["Stock"] = stockList;
+
             return View();
         }
 
@@ -53,11 +79,37 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdMovement,IdStock,MovementType,Quantity,Description,MovementUser,MovementDate")] Inventory inventory)
+        public async Task<IActionResult> Create([Bind("IdStock,MovementType,Quantity,Description")] Inventory inventory)
         {
             if (ModelState.IsValid)
             {
+                var stock = await _context.Stock.Where(c => c.IdStock == inventory.IdStock).FirstOrDefaultAsync();
+
+                inventory.MovementUser = "Alta";
+
+                inventory.IdMovement = (_context.Inventory
+                    .Where(x => x.IdStock == inventory.IdStock)
+                    .Max(x => (int?)x.IdMovement) ?? 0) + 1;
+
+                switch (inventory.MovementType)
+                {
+                    case "EN":
+                        stock.Quantity += inventory.Quantity;
+                        break;
+                    case "SA":
+                        stock.Quantity -= inventory.Quantity;
+                        break;
+                    case "AJ":
+                        stock.Quantity = inventory.Quantity;
+                        break;
+                    default:
+                        break;
+                }
+
                 _context.Add(inventory);
+
+                _context.Update(stock);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

@@ -11,8 +11,7 @@ namespace POS.Interfaces
     {
         void Add(Category category);
         void Delete(int id);
-        IEnumerable<Category> GetAllActive();
-        IEnumerable<Category> GetAllInactive();
+        IEnumerable<Category> GetAll(string status);
         Category GetById(int id);         
         void Inactivate(Category category);
         void Update(Category category);

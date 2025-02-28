@@ -26,38 +26,37 @@ namespace POS.Web.Controllers
         }
 
         // GET: Categorys
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status = "AC")
         {
             try
             {
                 IEnumerable<Category> categories = new List<Category>();
 
-                categories = _manageCategory.GetAllActive();
+                categories = _manageCategory.GetAll(status);
+
+                switch (status)
+                {
+                    case "AC":
+                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtTitle"] = "Activas";
+                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-button"] = "Categorías Inactivas";
+                        break;
+                    case "IN":
+                        ViewData["txtButton"] = "Activar";
+                        ViewData["txtTitle"] = "Inactivas";
+                        ViewData["asp-route"] = "AC";
+                        ViewData["asp-button"] = "Categorías Activas";
+                        break;
+                    default:
+                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtTitle"] = "Activas";
+                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-button"] = "Categorías Inactivas";
+                        break;
+                }
 
                 return View(categories);
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    Message = ex.Message,
-                    Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
-                });
-            }
-        }
-
-        public async Task<IActionResult> GetAllInactive()
-        {
-            try
-            {
-                IEnumerable<Category> categories = new List<Category>();
-
-                categories = _manageCategory.GetAllInactive();
-
-                return View("Index", categories);
             }
             catch (Exception ex)
             {

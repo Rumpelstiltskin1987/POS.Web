@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using POS.Entities;
 using System;
 
 namespace POS.Entities
@@ -10,6 +11,9 @@ namespace POS.Entities
         {
         }
 
+
+
+        public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<Category> Category { get; set; }
         public DbSet<CategoryLog> CategoryLog { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -23,16 +27,39 @@ namespace POS.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region User Account
+
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ApplicationUser>()
+                            .HasKey(u => u.IdUser); 
+
+            modelBuilder.Entity<ApplicationUser>()
+                .Property(u => u.UserName)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<ApplicationUser>()
+                .Property(u => u.UserPassword)
+                .IsRequired();
+
+            modelBuilder.Entity<ApplicationUser>()
+                .Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            #endregion
+
+
             modelBuilder.Entity<Category>(entity =>
-            {
-                entity.HasKey(e => e.IdCategory);
-                entity.Property(e => e.Name).IsRequired();
-                entity.Property(e => e.Status).IsRequired();
-                entity.Property(e => e.CreateUser).IsRequired();
-                entity.Property(e => e.CreateDate).IsRequired();
-                entity.Property(e => e.LastUpdateUser);
-                entity.Property(e => e.LastUpdateDate);
-            });
+                    {
+                        entity.HasKey(e => e.IdCategory);
+                        entity.Property(e => e.Name).IsRequired();
+                        entity.Property(e => e.Status).IsRequired();
+                        entity.Property(e => e.CreateUser).IsRequired();
+                        entity.Property(e => e.CreateDate).IsRequired();
+                        entity.Property(e => e.LastUpdateUser);
+                        entity.Property(e => e.LastUpdateDate);
+                    });
 
             modelBuilder.Entity<CategoryLog>(entity =>
             {
@@ -85,7 +112,7 @@ namespace POS.Entities
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.LastUpdateUser);
                 entity.Property(e => e.LastUpdateDate);
-            });                       
+            });
 
             modelBuilder.Entity<Sales>(entity =>
             {

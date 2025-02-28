@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using POS.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,11 @@ builder.Services.AddControllersWithViews();
 // Register the DbContext with the dependency injection container
 builder.Services.AddDbContext<MySQLiteContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("MySQLiteContext")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>()
+    .AddEntityFrameworkStores<MySQLiteContext>()
+    .AddDefaultTokenProviders();
+
 
 var app = builder.Build();
 
