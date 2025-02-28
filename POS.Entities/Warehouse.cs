@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace POS.Entities
 {
@@ -7,22 +8,16 @@ namespace POS.Entities
     {
         [Key]
         public int IdWarehouse { get; set; }
+        [Required(ErrorMessage = "El Nombre es obligatorio."), StringLength(100)]
+        public string? Name { get; set; }
 
-        public int IdWarehouseLocation { get; set; }
-
-        public int IdCategory { get; set; }
-
-        public int IdProduct { get; set; }
-
-        [Required]
-        public int Stock { get; set; }
-
-        public string CreateUser { get; set; }
-
+        [Required(ErrorMessage = "La Dirección es obligatoria.")]
+        [ForeignKey("WarehouseLocation")]
+        public int IdWL { get; set; } 
+        public WarehouseLocation? WarehouseLocation { get; set; } 
+        public string? CreateUser { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.Now;
-
-        public string LastUpdateUser { get; set; }
-
+        public string? LastUpdateUser { get; set; }
         public DateTime? LastUpdateDate { get; set; }
     }
 }

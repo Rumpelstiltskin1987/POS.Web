@@ -7,22 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Views\Categories\**" />
-    <Compile Remove="Views\Products\**" />
-    <Content Remove="Views\Categories\**" />
-    <Content Remove="Views\Products\**" />
-    <EmbeddedResource Remove="Views\Categories\**" />
-    <EmbeddedResource Remove="Views\Products\**" />
-    <None Remove="Views\Categories\**" />
-    <None Remove="Views\Products\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Controllers\CategoriesController.cs" />
-    <Compile Remove="Controllers\ProductsController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="POS.db" />
   </ItemGroup>
 
@@ -48,6 +32,10 @@
   <ItemGroup>
     <ProjectReference Include="..\POS.Business\POS.Business.csproj" />
     <ProjectReference Include="..\POS.Interfaces\POS.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>

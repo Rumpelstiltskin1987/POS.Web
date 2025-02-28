@@ -7,6 +7,8 @@ using POS.Interfaces;
 using POS.Core;
 using POS.Entities;
 using SQLitePCL;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace POS.Business
 {
@@ -23,23 +25,22 @@ namespace POS.Business
             _categoryLog = new CoreCategoryLog(_contextConnection);
         }
 
-        public string Add(Category category)
+        public void Add(Category category)
         {
             CategoryLog log = new();
-            string message = string.Empty;
 
-            try
+            using (var transaction = _contextConnection.Database.BeginTransaction())
             {
-                category.Status = "AC";
-                category.CreateUser = "Alta";
-                category.CreateDate = DateTime.Now;
-
-                message = _category.Add(category);
-
-                if (message == "Categoría registrada") 
+                try
                 {
+                    category.Status = "AC";
+                    category.CreateUser = "Alta";
+                    category.CreateDate = DateTime.Now;
+
+                    _category.Add(category);
+
                     log.IdMovement = 1;
-                    log.IdCategory = category.IdCategory;
+                    log.IdCategory = _category.GetIdCategory();
                     log.Name = category.Name;
                     log.Status = category.Status;
                     log.MovementType = "AL";
@@ -48,27 +49,51 @@ namespace POS.Business
 
                     _categoryLog.AddLog(log);
 
-                    _contextConnection.SaveChanges();
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    this._category.Dispose();
                 }
             }
-            finally
-            {
-                this._category.Dispose();
-            }
-
-            return message;
         }
 
-        public string Delete(int id)
+        public void Delete(int id)
         {
-            Category category = new();
+            using (var transaction = _contextConnection.Database.BeginTransaction())
+            {
+                try
+                {
+                    _category.Delete(id);
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    _category.Dispose();
+                }
+            }                
+        }
+
+        public IEnumerable<Category> GetAllActive()
+        {
             try
             {
-                GetById(id);
-                category.Status = "IN";
-                category.LastUpdateUser = "Update";
-                category.LastUpdateDate = DateTime.Now;
-                return _category.Delete(id);
+                return _category.GetAllActive();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             finally
             {
@@ -76,11 +101,15 @@ namespace POS.Business
             }
         }
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetAllInactive()
         {
             try
             {
-                return _category.GetAll();
+                return _category.GetAllInactive();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             finally
             {
@@ -94,17 +123,9 @@ namespace POS.Business
             {
                 return _category.GetById(id);
             }
-            finally
+            catch (Exception ex)
             {
-                _category.Dispose();
-            }
-        }
-
-        public Category Find(string name)
-        {
-            try
-            {
-                return _category.Find(name);
+                throw ex;
             }
             finally
             {
@@ -116,62 +137,76 @@ namespace POS.Business
         {
             CategoryLog log = new();
 
-            try
+            using (var transaction = _contextConnection.Database.BeginTransaction())
             {
-                category.Status = "IN";
-                category.LastUpdateUser = "Update";
-                category.LastUpdateDate = DateTime.Now;
+                try
+                {
+                    category.Status = "IN";
+                    category.LastUpdateUser = "Update";
+                    category.LastUpdateDate = DateTime.Now;
 
-                _category.Inactivate(category);
+                    _category.Inactivate(category);
 
-                log.IdMovement = _categoryLog.GetIdMovement(category.IdCategory) + 1;
-                log.IdCategory = category.IdCategory;
-                log.Name = category.Name;
-                log.Status = category.Status;
-                log.MovementType = "ED";
-                log.LastUpdateUser = "Editar";
-                log.LastUpdateDate = category.LastUpdateDate;
+                    log.IdMovement = _categoryLog.GetIdMovement(category.IdCategory) + 1;
+                    log.IdCategory = category.IdCategory;
+                    log.Name = category.Name;
+                    log.Status = category.Status;
+                    log.MovementType = "ED";
+                    log.LastUpdateUser = "Editar";
+                    log.LastUpdateDate = category.LastUpdateDate;
 
-                _categoryLog.AddLog(log);
+                    _categoryLog.AddLog(log);
 
-                _contextConnection.SaveChanges();
-            }
-            finally
-            {
-                _category.Dispose();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    _category.Dispose();
+                    _categoryLog.Dispose();
+                }
             }
         }
 
-        public string Update(Category category)
+        public void Update(Category category)
         {
             CategoryLog log = new();
-            string message = string.Empty;
 
-            try
+            using (var transaction = _contextConnection.Database.BeginTransaction())
             {
-                category.LastUpdateUser = "Update";
-                category.LastUpdateDate = DateTime.Now;
+                try
+                {
+                    category.LastUpdateUser = "Update";
+                    category.LastUpdateDate = DateTime.Now;
 
-                _category.Update(category);
+                    _category.Update(category);
 
-                log.IdMovement = _categoryLog.GetIdMovement(category.IdCategory) + 1;
-                log.IdCategory = category.IdCategory;
-                log.Name = category.Name;
-                log.Status = category.Status;
-                log.MovementType = "ED";
-                log.LastUpdateUser = "Editar";
-                log.LastUpdateDate = category.LastUpdateDate;
+                    log.IdMovement = _categoryLog.GetIdMovement(category.IdCategory) + 1;
+                    log.IdCategory = category.IdCategory;
+                    log.Name = category.Name;
+                    log.Status = category.Status;
+                    log.MovementType = "ED";
+                    log.LastUpdateUser = "Editar";
+                    log.LastUpdateDate = category.LastUpdateDate;
 
-                _categoryLog.AddLog(log);
+                    _categoryLog.AddLog(log);
 
-                _contextConnection.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    _category.Dispose();
+                }
             }
-            finally
-            {
-                _category.Dispose();
-            }
-
-            return message;
         }
     }
 }

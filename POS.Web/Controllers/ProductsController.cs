@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using POS.Web.Models;
+using POS.Business;
 using POS.Entities;
 
 namespace POS.Web.Controllers
@@ -12,101 +15,198 @@ namespace POS.Web.Controllers
     public class ProductsController : Controller
     {
         private readonly MySQLiteContext _context;
+        private readonly BusinessProduct _manageProduct;
+        private readonly BusinessCategory _manageCategory;
 
         public ProductsController(MySQLiteContext context)
         {
             _context = context;
+            _manageProduct = new BusinessProduct(_context);
+            _manageCategory = new BusinessCategory(_context); 
         }
 
-        // GET: Products
+        // GET: Productos
         public async Task<IActionResult> Index()
         {
-            var mySQLiteContext = _context.Product.Include(p => p.Category);
-            return View(await mySQLiteContext.ToListAsync());
-        }
+            IEnumerable<Product> products = new List<Product>();
 
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            try
             {
-                return NotFound();
+                products = _manageProduct.GetAll();
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            var product = await _context.Product
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.IdProduct == id);
+            return View(products);
+        }
+
+        // GET: Productos/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            Product product = new();
+
+            try
+            {
+                product = _manageProduct.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
             if (product == null)
             {
                 return NotFound();
             }
-
-            return View(product);
+            else
+            {
+                return View(product);
+            }
         }
 
-        // GET: Products/Create
+        // GET: Productos/Create
         public IActionResult Create()
         {
-            ViewData["IdCategory"] = new SelectList(_context.Category, "IdCategory", "Name");
+            var categories = _manageCategory.GetAllActive()
+                .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
+                .ToList();
+
+            ViewData["Categories"] = categories; 
+
             return View();
         }
 
-        // POST: Products/Create
+        // POST: Productos/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProduct,Name,IdCategory,Price,MeasureUnit,UrlImage,Status,CreateUser,CreateDate,LastUpdateUser,LastUpdateDate")] Product product)
+        public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage")] Product product, IFormFile ProductImage)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["IdCategory"] = new SelectList(_context.Category, "IdCategory", "Name", product.IdCategory);
-            return View(product);
-        }
-
-        // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Product.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            ViewData["IdCategory"] = new SelectList(_context.Category, "IdCategory", "Name", product.IdCategory);
-            return View(product);
-        }
-
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProduct,Name,IdCategory,Price,MeasureUnit,UrlImage,Status,CreateUser,CreateDate,LastUpdateUser,LastUpdateDate")] Product product)
-        {
-            if (id != product.IdProduct)
-            {
-                return NotFound();
-            }
+            string message = string.Empty;
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    message = _manageProduct.Add(product);
+
+                    if (ProductImage != null && ProductImage.Length > 0 && message == "Producto registrado")
+                    {
+                        // Ruta donde se guardará la imagen
+                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", ProductImage.FileName);
+
+                        // Guardar la imagen en la ruta especificada
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            await ProductImage.CopyToAsync(stream);
+                        }
+                    }
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message,
+                        InnerExceptionSource = ex.InnerException.Source
+                    });
+                }
+            }
+            else
+            {
+                var categories = _manageCategory.GetAllActive()
+                .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
+                .ToList();
+
+                ViewBag.Categories = categories;
+
+                return View(product);
+            }
+        }
+
+        // GET: Productos/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            Product product = new Product();
+
+            try
+            {
+                product = _manageProduct.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return View(product);
+            }
+        }
+
+        // POST: Productos/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("IdProduct,Name,IdCategory,Price,Stock,MeasureUnit," +
+            "UrlImage,Status,CreateUser,CreateDate")] Product product, IFormFile ProductImage)
+        {
+            string message = string.Empty;
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _manageProduct.Update(product);
+
+                    if (ProductImage != null && ProductImage.Length > 0 && message == "Producto actualizado")
+                    {
+                        // Ruta donde se guardará la imagen
+                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", ProductImage.FileName);
+
+                        // Guardar la imagen en la ruta especificada
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            await ProductImage.CopyToAsync(stream);
+                        }
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.IdProduct))
+                    if (!ProductsExists(product.IdProduct))
                     {
                         return NotFound();
                     }
@@ -115,49 +215,150 @@ namespace POS.Web.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message,
+                        InnerExceptionSource = ex.InnerException.Source
+                    });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdCategory"] = new SelectList(_context.Category, "IdCategory", "Name", product.IdCategory);
-            return View(product);
+            else
+            {
+                return View(product);
+            }
         }
 
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Productos/Delete/5
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
+            Product product = new();
+
+            try
             {
-                return NotFound();
+                product = _manageProduct.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            var product = await _context.Product
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.IdProduct == id);
             if (product == null)
             {
                 return NotFound();
             }
-
-            return View(product);
+            else
+            {
+                return View(product);
+            }
         }
 
-        // POST: Products/Delete/5
+        // POST: Productos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            if (product != null)
+            string message = string.Empty;
+
+            try
             {
-                _context.Product.Remove(product);
+                message = _manageProduct.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        // GET: Productos/Delete/5
+        public async Task<IActionResult> Inactivate(int id)
+        {
+            Product product = new();
+
+            try
+            {
+                product = _manageProduct.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return View(product);
+            }
+        }
+
+        // POST: Productos/Delete/5
+        [HttpPost, ActionName("Inactivate")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdProduct,Name,IdCategory,Price,Stock,MeasureUnit," +
+            "UrlImage,Status,CreateUser,CreateDate")] Product product)
+        {
+            string message = string.Empty;
+
+            try
+            {
+                message = _manageProduct.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool ProductsExists(int id)
         {
             return _context.Product.Any(e => e.IdProduct == id);
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

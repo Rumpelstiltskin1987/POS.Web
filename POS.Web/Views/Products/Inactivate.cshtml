@@ -1,0 +1,54 @@
+﻿@model POS.Entities.Product
+
+@{
+    ViewData["Title"] = "Inactivate";
+}
+
+<h1>Inactivar</h1>
+
+<div>
+    <h4>Producto</h4>
+    <hr />
+    <dl class="row">        
+        <dt class="col-sm-2">
+            Nombre
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Descripción
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            Categoría
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Category.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Precio
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class="col-sm-2">
+            Unidad de Medida
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.MeasureUnit)
+        </dd>
+    </dl>
+
+    <form asp-action="Inactivate">
+        <input type="hidden" asp-for="IdProduct" />
+        <input type="hidden" asp-for="IdCategory" />
+        <input type="hidden" asp-for="Status" />
+        <input type="hidden" asp-for="CreateUser" />
+        <input type="hidden" asp-for="CreateDate" />
+        <input type="submit" value="Inactivar" class="btn btn-danger" /> |
+        <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
+    </form>
+</div>

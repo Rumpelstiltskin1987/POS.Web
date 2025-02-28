@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using POS.Entities;
 
 using POS.Interfaces;
@@ -20,29 +21,30 @@ namespace POS.Core
             try
             {
                 _contextConnection.Add(log);
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw ex;
-            }
+            }        
         }
 
         public int GetIdMovement(int IdCategory)
         {
-            int movementID = 0;
+            int IdMovement = 0;
 
             try
             {
-                movementID = _contextConnection.CategoryLog
+                IdMovement = _contextConnection.CategoryLog
                     .Where(x => x.IdCategory == IdCategory)
                     .Max(x => (int?)x.IdMovement) ?? 0;
             }
             catch (Exception ex)
             {
-                throw ex;   
+                throw ex;
             }
 
-            return movementID;
+            return IdMovement;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using POS.Interfaces;
 using POS.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace POS.Core
 {
@@ -36,9 +37,6 @@ namespace POS.Core
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
             return message;
         }
@@ -64,29 +62,8 @@ namespace POS.Core
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
             return message;
-        }
-
-        public IEnumerable<Product> Find(Expression<Product> exp)
-        {
-            IEnumerable<Product> products = new List<Product>();
-            try
-            {
-                //products = _contextConnection.Product.Find(exp);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-            }
-
-            return products;
         }
 
         public IEnumerable<Product> GetAll()
@@ -96,18 +73,36 @@ namespace POS.Core
             try
             {
                 products = _contextConnection.Product
-                    .Where(x => x.Status == "AC").ToList();//AsEnumerable();
+                    .Where(x => x.Status == "AC")
+                    .Include(x => x.Category) 
+                    .ToList();//AsEnumerable();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
             return products;
 
+        }
+
+        public IEnumerable<Product> GetAllInactive()
+        {
+            IEnumerable<Product> products = new List<Product>();
+
+            try
+            {
+                products = _contextConnection.Product
+                    .Where(x => x.Status == "IN")
+                    .Include(x => x.Category)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return products;
         }
 
         public Product GetById(int id)
@@ -124,17 +119,25 @@ namespace POS.Core
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
             return product;
         }
 
-        public string Update(Product product)
+        public void Inactivate(Product product)
         {
-            string message = string.Empty;
+            try
+            {
+                _contextConnection.Update(product);
+                _contextConnection.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        public void Update(Product product)
+        {
             try
             {
                 product.LastUpdateUser = "Update";
@@ -142,17 +145,13 @@ namespace POS.Core
 
                 _contextConnection.Update(product);
                 _contextConnection.SaveChanges();
-                message = "Producto actualizado";
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
-
-            return message;
         }
+
+        
     }
 }

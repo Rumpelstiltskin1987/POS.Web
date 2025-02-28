@@ -18,5 +18,12 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+background {
+    background-image: url('../images/smartStock.jpg'); /* Ruta relativa */
+    background-size: cover; /* Ajustar a la pantalla */
+    background-position: center;
+    background-repeat: no-repeat;
 }

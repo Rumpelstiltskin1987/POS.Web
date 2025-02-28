@@ -15,6 +15,8 @@ namespace POS.Entities
 
         [Required(ErrorMessage = "El Nombre es obligatorio."), StringLength(100)]
         public string? Name { get; set; }
+
+        [Required(ErrorMessage = "La descripción es obligatoria."), StringLength(100)]
         public string? Description { get; set; }    
                
         [Required(ErrorMessage = "La categoría es obligatoria.")]

@@ -18,57 +18,38 @@ namespace POS.Core
         { 
         }
 
-        public string Add(Category category)
+        public void Add(Category category)
         {
-            string message = string.Empty;
-
             try
             {                
                 _contextConnection.Add(category);
 
-                message = "Categoría registrada";
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
-
-            return message;
         }
 
-        public string Delete(int id)
+        public void Delete(int id)
         {
-            Category category = new Category();
-
-            string message = string.Empty;
+            Category category = new();
 
             try
             {
-                GetById(id);
-                category.Status = "IN"; 
-                category.LastUpdateUser = "Update";
-                category.LastUpdateDate = DateTime.Now;
+                _contextConnection.Category
+                    .Remove(new Category { IdCategory = id });
 
-                _contextConnection.Update(category);
-                _contextConnection.SaveChanges();
-
-                message = "Categoria eliimnada";
+                _contextConnection.SaveChanges(); 
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
-
-            return message;
         }
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetAllActive()
         {
             IEnumerable<Category> categories = new List<Category>();
 
@@ -86,6 +67,24 @@ namespace POS.Core
             return categories;    
         }
 
+        public IEnumerable<Category> GetAllInactive()
+        {
+            IEnumerable<Category> categories = new List<Category>();
+
+            try
+            {
+                categories = _contextConnection.Category
+                    .Where(x => x.Status == "IN")
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return categories;
+        }
+
         public Category GetById(int id)
         {
             Category category = new Category();
@@ -100,70 +99,55 @@ namespace POS.Core
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
             return category;
         }
 
-        public Category Find(string name)
+        public int GetIdCategory()
         {
-            Category category = new Category();
+            int idCategory = 0;
 
             try
             {
-                category = _contextConnection.Category.FirstOrDefault();
+                idCategory = _contextConnection.Database
+                    .SqlQueryRaw<int>("SELECT seq FROM sqlite_sequence WHERE name = 'Category'")
+                    .AsEnumerable()
+                    .FirstOrDefault();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
 
-            return category;
+            return idCategory;
         }
 
         public void Inactivate(Category category)
         {
             try
-            {            
-
+            {
                 _contextConnection.Update(category);
+
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw ex;
-            }
-            finally
-            {
             }
         }
 
-        public string Update(Category category)
+        public void Update(Category category)
         {
-            string message = string.Empty;
-
             try
             {
-                category.LastUpdateUser = "Update";
-                category.LastUpdateDate = DateTime.Now;
-
                 _contextConnection.Update(category);
 
-                message = "Categoria actualizada";
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            finally
-            {
-            }
-
-            return message;
         }
     }
 }

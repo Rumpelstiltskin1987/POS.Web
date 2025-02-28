@@ -5,14 +5,9 @@ namespace POS.Entities
     public class WarehouseLocation
     {
         [Key]
-        public int IdWarehouseLocation { get; set; }
+        public int IdWL { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
-
-        [Required]
-        [StringLength(200)]
+        [Required(ErrorMessage = "La Dirección es obligatoria."), StringLength(100)]
         public string Address { get; set; }
     }
 }

@@ -4,86 +4,63 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Lista de Productos</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-secondary">Agregar Producto</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                Imagen
+            </th>            
+            <th>
+                Nombre
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Category)
+                Descripción
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Price)
+                Categoría
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MeasureUnit)
+                Precio
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UrlImage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastUpdateUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastUpdateDate)
+                Unidad de Medida
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MeasureUnit)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UrlImage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateUser)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastUpdateUser)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastUpdateDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdProduct">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdProduct">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdProduct">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <img src="@item.UrlImage" alt="Imagen de @item.Name" style="width: 50px; height: auto;" />
+                </td>                
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MeasureUnit)
+                </td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-primary" asp-route-id="@item.IdProduct">Editar</a> |
+                    <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.IdProduct">Detalles</a> |
+                    <a asp-action="Delete" class="btn btn-warning" asp-route-id="@item.IdProduct">Inactivar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

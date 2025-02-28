@@ -9,12 +9,12 @@ namespace POS.Interfaces
 {
     public interface ICategory
     {
-        IEnumerable<Category> GetAll();
-        Category GetById(int id);
-        Category Find(string name);
-        string Add(Category category);
-        string Update(Category category);
-        string Delete(int id); 
-        void Inactivate(Category category);    
+        void Add(Category category);
+        void Delete(int id);
+        IEnumerable<Category> GetAllActive();
+        IEnumerable<Category> GetAllInactive();
+        Category GetById(int id);         
+        void Inactivate(Category category);
+        void Update(Category category);
     }
 }

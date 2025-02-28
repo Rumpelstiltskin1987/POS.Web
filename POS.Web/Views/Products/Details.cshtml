@@ -4,75 +4,48 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Detailes</h1>
 
 <div>
-    <h4>Product</h4>
+    <h4>Producto</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MeasureUnit)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MeasureUnit)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UrlImage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UrlImage)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateUser)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateUser)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastUpdateUser)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastUpdateUser)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastUpdateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastUpdateDate)
-        </dd>
-    </dl>
+    <table>
+        <tr>
+            <td>
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        Nombre
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.Name)
+                    </dd>
+                    <dt class="col-sm-2">
+                        Categoría
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.IdCategory)
+                    </dd>
+                    <dt class="col-sm-2">
+                        Precio
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.Price)
+                    </dd>
+                    <dt class="col-sm-2">
+                        Unidad de Medida
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(model => model.MeasureUnit)
+                    </dd>
+                </dl>
+            </td>
+            <td>
+                <img src="@Model.UrlImage" alt="Imagen de @Model.Name" style="width: 100px; height: auto;" />
+            </td>            
+        </tr>
+    </table>  
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdProduct">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.IdProduct">Edit</a> |
+    <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
 </div>

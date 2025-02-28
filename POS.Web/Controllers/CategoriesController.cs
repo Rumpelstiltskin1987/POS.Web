@@ -5,87 +5,176 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using POS.Web.Models;
+using POS.Business;
 using POS.Entities;
+
+using SQLitePCL;
 
 namespace POS.Web.Controllers
 {
     public class CategoriesController : Controller
     {
         private readonly MySQLiteContext _context;
+        private readonly BusinessCategory _manageCategory;
 
         public CategoriesController(MySQLiteContext context)
         {
             _context = context;
+            _manageCategory = new BusinessCategory(_context);
         }
 
-        // GET: Categories
+        // GET: Categorys
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Category.ToListAsync());
+            try
+            {
+                IEnumerable<Category> categories = new List<Category>();
+
+                categories = _manageCategory.GetAllActive();
+
+                return View(categories);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
         }
 
-        // GET: Categories/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> GetAllInactive()
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                IEnumerable<Category> categories = new List<Category>();
+
+                categories = _manageCategory.GetAllInactive();
+
+                return View("Index", categories);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+        }
+
+        // GET: Categorys/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            Category category = new Category();
+
+            try
+            {
+                category = _manageCategory.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.IdCategory == id);
             if (category == null)
             {
                 return NotFound();
             }
-
-            return View(category);
+            else
+            {
+                return View(category);
+            }
         }
 
-        // GET: Categories/Create
+        // GET: Categorys/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Categories/Create
+        // POST: Categorys/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCategory,Name,Status,CreateUser,CreateDate,LastUpdateUser,LastUpdateDate")] Category category)
+        public async Task<IActionResult> Create([Bind("IdCategory,Name")] Category category)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _manageCategory.Add(category);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message,
+                        InnerExceptionSource = ex.InnerException.Source
+                    });
+                }
             }
             return View(category);
         }
 
-        // GET: Categories/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: Categorys/Edit/5
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
+            Category category = new Category();
+
+            try
             {
-                return NotFound();
+                category = _manageCategory.GetById(id);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            var category = await _context.Category.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
             return View(category);
         }
 
-        // POST: Categories/Edit/5
+        // POST: Categorys/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdCategory,Name,Status,CreateUser,CreateDate,LastUpdateUser,LastUpdateDate")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("IdCategory,Name,Status," +
+            "CreateUser,CreateDate")] Category category)
         {
             if (id != category.IdCategory)
             {
@@ -96,8 +185,7 @@ namespace POS.Web.Controllers
             {
                 try
                 {
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
+                    _manageCategory.Update(category);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -110,41 +198,134 @@ namespace POS.Web.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message,
+                        InnerExceptionSource = ex.InnerException.Source
+                    });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-        // GET: Categories/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Categorys/Delete/5
+        public async Task<IActionResult> Inactivate(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            Category category = new();
 
-            var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.IdCategory == id);
-            if (category == null)
+            try
             {
-                return NotFound();
+                category = _manageCategory.GetById(id);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
             return View(category);
         }
 
-        // POST: Categories/Delete/5
+        // POST: Categorys/Delete/5
+        [HttpPost, ActionName("Inactivate")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdCategory,Name,Status," +
+            "CreateUser,CreateDate")] Category category)
+        {
+
+            if (id != category.IdCategory)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                _manageCategory.Inactivate(category);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            Category category = new();
+
+            try
+            {
+                category = _manageCategory.GetById(id);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
+            }
+
+            return View(category);
+        }
+
+        // POST: Categorys/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Category.FindAsync(id);
-            if (category != null)
+            try
             {
-                _context.Category.Remove(category);
+                _manageCategory.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message,
+                    InnerExceptionSource = ex.InnerException.Source
+                });
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

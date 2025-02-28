@@ -11,7 +11,7 @@ namespace POS.Core
     public class BaseCore : System.IDisposable
     {
         public MySQLiteContext _contextConnection;
-
+       
         public BaseCore(MySQLiteContext context)
         {
             _contextConnection = context;
