@@ -1,10 +1,10 @@
 ﻿@model POS.Entities.Warehouse
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar";
 }
 
-<h1>Delete</h1>
+<h1>Eliminar</h1>
 
 <h3>Are you sure you want to delete this?</h3>
 <div>
@@ -51,7 +51,8 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="IdWarehouse" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <br />
+        <input type="submit" value="Eliminar" class="btn btn-danger" /> |
+        <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
     </form>
 </div>

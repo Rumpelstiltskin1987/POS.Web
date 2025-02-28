@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,21 +13,22 @@ namespace POS.Entities
         [Key]
         public int IdStock { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "El Almacén es obligatorio.")]
+        [ForeignKey("Warehouse")]
         public int IdWarehouse { get; set; }
+        public Warehouse? Warehouse { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "El Producto es obligatorio.")]
+        [ForeignKey("Product")]
         public int IdProduct { get; set; }
+        public Product? Product { get; set; }
 
-        [Required]
-        public int IdCategory { get; set; }
-
-        [Required]
+        [Required(ErrorMessage = "La Cantidad es obligatoria.")]
         [Range(1, int.MaxValue, ErrorMessage = "El stock debe ser mayor que cero.")]
         public int Quantity { get; set; }
         public string? CreateUser { get; set; }
-        public string? CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; } = DateTime.Now;
         public string? LastUpdateUser { get; set; }
-        public string? LastUpdateDate { get; set; }
+        public DateTime? LastUpdateDate { get; set; }
     }
 }

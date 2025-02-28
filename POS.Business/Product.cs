@@ -126,9 +126,14 @@ namespace POS.Business
 
                     _product.Inactivate(product);
 
-                    log.IdMovement = _productLog.GetIdMovement(product.IdCategory);
-                    log.IdCategory = product.IdCategory;
+                    log.IdMovement = _productLog.GetIdMovement(product.IdCategory) + 1;
+                    log.IdProduct = product.IdProduct;
                     log.Name = product.Name;
+                    log.Description = product.Description;
+                    log.IdCategory = product.IdCategory;
+                    log.Price = product.Price;
+                    log.MeasureUnit = product.MeasureUnit;
+                    log.UrlImage = product.UrlImage;
                     log.Status = product.Status;
                     log.MovementType = "ED";
                     log.LastUpdateUser = "Editar";

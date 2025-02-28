@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using POS.Entities;
+using POS.Web.Models;
 
 namespace POS.Web.Controllers
 {
@@ -146,6 +148,20 @@ namespace POS.Web.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Inactivate(int? id)
+        {
+
+            return View("Error", new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                Message = "Pagina en construcción",
+                Source = "Inactivar Ubicación",
+                InnerExceptionMessage = "",
+                InnerExceptionSource = ""
+            });
+
         }
 
         private bool WarehouseLocationExists(int id)

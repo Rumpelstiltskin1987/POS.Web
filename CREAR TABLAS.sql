@@ -74,14 +74,12 @@ CREATE TABLE Stock (
 	IdStock INTEGER PRIMARY KEY AUTOINCREMENT,	
 	IdWarehouse INTEGER NOT NULL,
 	IdProduct INTEGER NOT NULL,
-	IdCategory INTEGER NOT NULL,
 	Quantity INTEGER NOT NULL,
 	CreateUser TEXT  NOT NULL,									
 	CreateDate TEXT NOT NULL,									
 	LastUpdateUser TEXT,
 	LastUpdateDate TEXT,
 	FOREIGN KEY (IdProduct) REFERENCES Product(IdProduct),
-	FOREIGN KEY (IdCategory) REFERENCES Category(IdCategory),
 	FOREIGN KEY (IdWarehouse) REFERENCES Warehouse(IdWarehouse),
 	UNIQUE (IdProduct,IdWarehouse)	
 );

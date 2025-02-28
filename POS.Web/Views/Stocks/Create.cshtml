@@ -1,10 +1,10 @@
 ﻿@model POS.Entities.Stock
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Alta";
 }
 
-<h1>Create</h1>
+<h1>Alta</h1>
 
 <h4>Stock</h4>
 <hr />
@@ -13,47 +13,28 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="IdWarehouse" class="control-label"></label>
-                <input asp-for="IdWarehouse" class="form-control" />
+                <label asp-for="IdWarehouse" class="control-label">Almacén</label>
+                <select asp-for="IdWarehouse" class="form-control" asp-items="ViewBag.Warehouse">
+                    <option value="">Seleccione una almacén</option>
+                </select>
                 <span asp-validation-for="IdWarehouse" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IdProduct" class="control-label"></label>
-                <input asp-for="IdProduct" class="form-control" />
+                <label asp-for="IdProduct" class="control-label">Producto</label>
+                <select asp-for="IdProduct" class="form-control" asp-items="ViewBag.Product">
+                    <option value="">Seleccione un producto</option>
+                </select>
                 <span asp-validation-for="IdProduct" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCategory" class="control-label"></label>
-                <input asp-for="IdCategory" class="form-control" />
-                <span asp-validation-for="IdCategory" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Quantity" class="control-label"></label>
                 <input asp-for="Quantity" class="form-control" />
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
+            <br />
             <div class="form-group">
-                <label asp-for="CreateUser" class="control-label"></label>
-                <input asp-for="CreateUser" class="form-control" />
-                <span asp-validation-for="CreateUser" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreateDate" class="control-label"></label>
-                <input asp-for="CreateDate" class="form-control" />
-                <span asp-validation-for="CreateDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastUpdateUser" class="control-label"></label>
-                <input asp-for="LastUpdateUser" class="form-control" />
-                <span asp-validation-for="LastUpdateUser" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastUpdateDate" class="control-label"></label>
-                <input asp-for="LastUpdateDate" class="form-control" />
-                <span asp-validation-for="LastUpdateDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Agregar" class="btn btn-primary" /> |
+                <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
             </div>
         </form>
     </div>

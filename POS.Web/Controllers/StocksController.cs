@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using POS.Entities;
+using POS.Web.Models;
 
 namespace POS.Web.Controllers
 {
@@ -21,7 +23,16 @@ namespace POS.Web.Controllers
         // GET: Stocks
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Stock.ToListAsync());
+            IEnumerable<Stock> stocks = new List<Stock>();
+
+            stocks = _context.Stock
+                .Include(x => x.Warehouse)
+                .Include(x => x.Warehouse.WarehouseLocation)
+                .Include(x => x.Product)
+                .Include(x => x.Product.Category)
+                .ToList();
+
+            return View(stocks);
         }
 
         // GET: Stocks/Details/5
@@ -45,6 +56,27 @@ namespace POS.Web.Controllers
         // GET: Stocks/Create
         public IActionResult Create()
         {
+            IEnumerable<Warehouse> warehouses = new List<Warehouse>();
+            IEnumerable<Product> products = new List<Product>();
+
+            warehouses = _context.Warehouse.ToList();
+            products = _context.Product.ToList();
+
+            var Warehouse = warehouses.Select(c => new SelectListItem
+            {
+                Value = c.IdWarehouse.ToString(),
+                Text = c.Name
+            }).ToList();
+
+            var Product = products.Select(c => new SelectListItem
+            {
+                Value = c.IdProduct.ToString(),
+                Text = c.Name
+            }).ToList();
+
+            ViewData["Warehouse"] = Warehouse;
+            ViewData["Product"] = Product;
+
             return View();
         }
 
@@ -53,10 +85,12 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdStock,IdWarehouse,IdProduct,IdCategory,Quantity,CreateUser,CreateDate,LastUpdateUser,LastUpdateDate")] Stock stock)
+        public async Task<IActionResult> Create([Bind("IdWarehouse,IdProduct,Quantity")] Stock stock)
         {
             if (ModelState.IsValid)
-            {
+            {                
+                stock.CreateUser = "Alta";
+
                 _context.Add(stock);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -146,6 +180,20 @@ namespace POS.Web.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Inactivate(int? id)
+        {
+
+            return View("Error", new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                Message = "Pagina en construcción",
+                Source = "Inactivar Amacén",
+                InnerExceptionMessage = "",
+                InnerExceptionSource = ""
+            });
+
         }
 
         private bool StockExists(int id)

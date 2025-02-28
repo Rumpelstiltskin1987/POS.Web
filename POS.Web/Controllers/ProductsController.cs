@@ -326,14 +326,12 @@ namespace POS.Web.Controllers
         // POST: Productos/Delete/5
         [HttpPost, ActionName("Inactivate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdProduct,Name,IdCategory,Price,Stock,MeasureUnit," +
-            "UrlImage,Status,CreateUser,CreateDate")] Product product)
+        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdProduct,Name,Description,IdCategory,Price,MeasureUnit,Status," +
+            "UrlImage,CreateUser,CreateDate")] Product product)
         {
-            string message = string.Empty;
-
             try
             {
-                message = _manageProduct.Delete(id);
+                _manageProduct.Inactivate(product);
             }
             catch (Exception ex)
             {

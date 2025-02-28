@@ -4,17 +4,17 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Lista de Ubicaciones</h1>
 
 <p>
-    <a asp-action="Create">Agregar Almacén</a> | 
-    <a asp-controller="Warehouses" asp-action="Index">Almacenes</a>
+    <a class="btn btn-secondary" asp-action="Create">Agregar Ubicación</a> |
+    <a class="btn btn-secondary" asp-controller="Warehouses" asp-action="Index">Almacenes</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                Dirección
             </th>
             <th></th>
         </tr>
@@ -26,9 +26,9 @@
                 @Html.DisplayFor(modelItem => item.Address)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.IdWL">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdWL">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdWL">Delete</a>
+                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.IdWL">Editar</a> |
+                <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.IdWL">Detalles</a> |
+                <a class="btn btn-warning" asp-action="Inactivate" asp-route-id="@item.IdWL">Inactivar</a>
             </td>
         </tr>
 }
