@@ -71,7 +71,7 @@ namespace POS.Web.Controllers
             var Product = products.Select(c => new SelectListItem
             {
                 Value = c.IdProduct.ToString(),
-                Text = c.Name
+                Text = $"{c.Name} / {c.Description}"
             }).ToList();
 
             ViewData["Warehouse"] = Warehouse;

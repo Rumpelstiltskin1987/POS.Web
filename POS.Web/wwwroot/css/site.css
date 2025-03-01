@@ -21,9 +21,15 @@ body {
     margin-bottom: 60px;
 }
 
-background {
-    background-image: url('../images/smartStock.jpg'); /* Ruta relativa */
-    background-size: cover; /* Ajustar a la pantalla */
-    background-position: center;
-    background-repeat: no-repeat;
+.backgroundStart {
+    position: fixed; /* Hace que el fondo permanezca fijo al desplazarse */
+    top: 0;
+    left: 0;
+    width: 100vw; /* 100% del ancho de la ventana */
+    height: 100vh; /* 100% de la altura de la ventana */
+    background-image: url('../images/smartStock.jpg');
+    background-size: cover; /* Cubre todo el div */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    z-index: -1; /* Opcional: Envía el div al fondo para no tapar el contenido */
 }

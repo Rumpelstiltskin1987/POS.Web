@@ -87,7 +87,7 @@ CREATE TABLE Stock (
 CREATE TABLE Inventory (
     IdMovement INTEGER NOT NULL, 				-- Identificador único del movimiento
     IdStock INTEGER NOT NULL,                    				-- Referencia al producto afectado
-    MovementType TEXT NOT NULL CHECK(MovementType IN ('Entrada', 'Salida', 'Ajuste')), -- Tipo de movimiento (Entrada/Salida)
+    MovementType TEXT NOT NULL CHECK(MovementType IN ('EN', 'SA', 'AJ')), -- Tipo de movimiento (Entrada/Salida)
     Quantity REAL NOT NULL,                         			-- Cantidad de producto movida
 	Description TEXT NOT NULL,
 	MovementUser TEXT NOT NULL,									-- Usuario que realiza el movimiento
@@ -118,6 +118,12 @@ CREATE TABLE SalesDetail (
 	LastUpdateDate TEXT,											-- Feha de modificación del registro
     FOREIGN KEY (IdSales) REFERENCES Sales(IdSales), 			-- Relación con Ventas
     FOREIGN KEY (IdProduct) REFERENCES Product(IdProduct) 		-- Relación con Productos
+);
+
+CREATE TABLE ApplicationUser (
+	IdUser INTEGER PRIMARY KEY AUTOINCREMENT,
+	UserName TEXT NOT NULL,	
+	UserPassword TEXT NOT NULL	
 );
 
 
