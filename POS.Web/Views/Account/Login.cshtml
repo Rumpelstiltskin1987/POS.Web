@@ -1,0 +1,58 @@
+﻿@model POS.Entities.ApplicationUser
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h2>SmartStock</h2>
+        <h4>Iniciar Sesión</h4>
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" name="username" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" name="password" class="form-control" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        </form>
+
+        <div class="register-link">
+            <p>¿No tienes cuenta? <a asp-controller="Account" asp-action="Register">Regístrate aquí</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+    }
+    .login-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 350px;
+    }
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+    .btn-block {
+        width: 100%;
+    }
+    .register-link {
+        margin-top: 1rem;
+    }
+</style>

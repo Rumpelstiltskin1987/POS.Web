@@ -41,12 +41,14 @@ namespace POS.Web.Controllers
                         ViewData["txtTitle"] = "Activas";
                         ViewData["asp-route"] = "IN";
                         ViewData["asp-button"] = "Categorías Inactivas";
+                        ViewData["asp-action"] = "Edit";
                         break;
                     case "IN":
                         ViewData["txtButton"] = "Activar";
                         ViewData["txtTitle"] = "Inactivas";
                         ViewData["asp-route"] = "AC";
                         ViewData["asp-button"] = "Categorías Activas";
+                        ViewData["asp-action"] = "Edit";
                         break;
                     default:
                         ViewData["txtButton"] = "Inactivar";
@@ -65,8 +67,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
         }
@@ -87,8 +89,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 
@@ -130,8 +132,8 @@ namespace POS.Web.Controllers
                         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                         Message = ex.Message,
                         Source = ex.Source,
-                        InnerExceptionMessage = ex.InnerException.Message,
-                        InnerExceptionSource = ex.InnerException.Source
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
                 }
             }
@@ -139,7 +141,7 @@ namespace POS.Web.Controllers
         }
 
         // GET: Categorys/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string option)
         {
             Category category = new Category();
 
@@ -159,10 +161,27 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
+
+            switch (option)
+            {
+                case "Activar":
+                    category.Status = "AC";
+                    ViewData["btn-class"] = "btn btn-success";
+                     break;
+                case "Inactivar":
+                    category.Status = "IN";
+                    ViewData["btn-class"] = "btn btn-warning";
+                    break;
+                default:
+                    ViewData["btn-class"] = "btn btn-primary";
+                    break;
+            }
+
+            ViewData["Option"] = option;
 
             return View(category);
         }
@@ -204,75 +223,14 @@ namespace POS.Web.Controllers
                         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                         Message = ex.Message,
                         Source = ex.Source,
-                        InnerExceptionMessage = ex.InnerException.Message,
-                        InnerExceptionSource = ex.InnerException.Source
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
                 }
 
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
-        }
-
-        // GET: Categorys/Delete/5
-        public async Task<IActionResult> Inactivate(int id)
-        {
-            Category category = new();
-
-            try
-            {
-                category = _manageCategory.GetById(id);
-
-                if (category == null)
-                {
-                    return NotFound();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    Message = ex.Message,
-                    Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
-                });
-            }
-
-            return View(category);
-        }
-
-        // POST: Categorys/Delete/5
-        [HttpPost, ActionName("Inactivate")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdCategory,Name,Status," +
-            "CreateUser,CreateDate")] Category category)
-        {
-
-            if (id != category.IdCategory)
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                _manageCategory.Inactivate(category);
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    Message = ex.Message,
-                    Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
-                });
-            }
-
-            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int id)
@@ -296,8 +254,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 
@@ -320,8 +278,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 

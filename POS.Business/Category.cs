@@ -35,7 +35,7 @@ namespace POS.Business
                 {
                     category.Status = "AC";
                     category.CreateUser = "Alta";
-                    category.CreateDate = DateTime.Now;
+                    //category.CreateDate = DateTime.Now;
 
                     _category.Add(category);
 
