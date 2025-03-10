@@ -9,6 +9,8 @@ using System.Diagnostics;
 using POS.Web.Models;
 using POS.Business;
 using POS.Entities;
+using Microsoft.CodeAnalysis.Options;
+using POS.Interfaces;
 
 namespace POS.Web.Controllers
 {
@@ -26,13 +28,39 @@ namespace POS.Web.Controllers
         }
 
         // GET: Productos
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status = "AC")
         {
             IEnumerable<Product> products = new List<Product>();
 
             try
             {
-                products = _manageProduct.GetAll();
+                products = _manageProduct.GetAll(status);
+
+                switch (status)
+                {
+                    case "AC":
+                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtTitle"] = "Activos";
+                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-button"] = "Productos Inactivos";
+                        ViewData["asp-action"] = "Edit";
+                        break;
+                    case "IN":
+                        ViewData["txtButton"] = "Activar";
+                        ViewData["txtTitle"] = "Inactivos";
+                        ViewData["asp-route"] = "AC";
+                        ViewData["asp-button"] = "Productos Activos";
+                        ViewData["asp-action"] = "Edit";
+                        break;
+                    default:
+                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtTitle"] = "Activas";
+                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-button"] = "Categorías Inactivas";
+                        break;
+                }
+
+                return View(products);
             }
             catch (Exception ex)
             {
@@ -44,9 +72,7 @@ namespace POS.Web.Controllers
                     InnerExceptionMessage = ex.InnerException.Message,
                     InnerExceptionSource = ex.InnerException.Source
                 });
-            }
-
-            return View(products);
+            }            
         }
 
         // GET: Productos/Details/5
@@ -97,7 +123,7 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage")] Product product, IFormFile ProductImage)
+        public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage")] Product product, IFormFile? ProductImage)
         {
             string message = string.Empty;
 
@@ -105,12 +131,12 @@ namespace POS.Web.Controllers
             {
                 try
                 {
-                    message = _manageProduct.Add(product);
+                    _manageProduct.Add(product);
 
-                    if (ProductImage != null && ProductImage.Length > 0 && message == "Producto registrado")
+                    if (ProductImage != null && ProductImage.Length > 0)
                     {
                         // Ruta donde se guardará la imagen
-                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", ProductImage.FileName);
+                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\products", ProductImage.FileName);
 
                         // Guardar la imagen en la ruta especificada
                         using (var stream = new FileStream(imagePath, FileMode.Create))
@@ -146,10 +172,10 @@ namespace POS.Web.Controllers
         }
 
         // GET: Productos/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string option)
         {
             Product product = new Product();
-
+          
             try
             {
                 product = _manageProduct.GetById(id);
@@ -172,6 +198,29 @@ namespace POS.Web.Controllers
             }
             else
             {
+                //var categories = _manageCategory.GetAll("AC")
+                //    .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
+                //    .ToList();
+
+                //ViewData["Categories"] = categories;
+
+                switch (option)
+                {
+                    case "Activar":
+                        product.Status = "AC";
+                        ViewData["btn-class"] = "btn btn-success";
+                        break;
+                    case "Inactivar":
+                        product.Status = "IN";
+                        ViewData["btn-class"] = "btn btn-warning";
+                        break;
+                    default:
+                        ViewData["btn-class"] = "btn btn-primary";
+                        break;
+                }
+
+                ViewData["Option"] = option;
+
                 return View(product);
             }
         }
@@ -181,8 +230,8 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProduct,Name,IdCategory,Price,Stock,MeasureUnit," +
-            "UrlImage,Status,CreateUser,CreateDate")] Product product, IFormFile ProductImage)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProduct,Name,Description,IdCategory,Price,Stock,MeasureUnit," +
+            "UrlImage,Status,CreateUser,CreateDate")] Product product, IFormFile? ProductImage)
         {
             string message = string.Empty;
 
@@ -192,10 +241,10 @@ namespace POS.Web.Controllers
                 {
                     _manageProduct.Update(product);
 
-                    if (ProductImage != null && ProductImage.Length > 0 && message == "Producto actualizado")
+                    if (ProductImage != null && ProductImage.Length > 0)
                     {
                         // Ruta donde se guardará la imagen
-                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", ProductImage.FileName);
+                        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\products", ProductImage.FileName);
 
                         // Guardar la imagen en la ruta especificada
                         using (var stream = new FileStream(imagePath, FileMode.Create))
@@ -275,7 +324,7 @@ namespace POS.Web.Controllers
 
             try
             {
-                message = _manageProduct.Delete(id);
+                _manageProduct.Delete(id);
             }
             catch (Exception ex)
             {
@@ -331,7 +380,7 @@ namespace POS.Web.Controllers
         {
             try
             {
-                _manageProduct.Inactivate(product);
+
             }
             catch (Exception ex)
             {

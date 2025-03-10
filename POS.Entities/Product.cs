@@ -31,7 +31,7 @@ namespace POS.Entities
         public string? UrlImage { get; set; }
         public string? Status { get; set; }
         public string? CreateUser { get; set; }
-        public DateTime? CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; } = DateTime.Now;
         public string? LastUpdateUser { get; set; }
         public DateTime? LastUpdateDate { get; set; }
     }

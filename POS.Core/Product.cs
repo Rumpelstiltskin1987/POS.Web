@@ -18,84 +18,61 @@ namespace POS.Core
         {
         }
 
-        public string Add(Product product)
+        public void Add(Product product)
         {
-            string message = string.Empty;
-
             try
             {
-                product.Status = "AC";
-                product.CreateUser = "Alta";
-                product.CreateDate = DateTime.Now;
-
                 _contextConnection.Add(product);
-                _contextConnection.SaveChanges();
 
-                message = "Producto registrado";
+                _contextConnection.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            return message;
         }
 
-        public string Delete(int id)
+        public void Delete(int id)
         {
-            Product product = new Product();
 
-            string message = string.Empty; try
+            try
             {
-                product = GetById(id);
+                _contextConnection.Product
+                    .Remove(new Product { IdProduct = id });
 
-                product.Status = "IN";
-                product.LastUpdateUser = "Update";
-                product.LastUpdateDate = DateTime.Now;
-
-                _contextConnection.Update(product);
                 _contextConnection.SaveChanges();
-
-                message = "Producto eliminado";
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            return message;
         }
 
-        public IEnumerable<Product> GetAll()
+        public IEnumerable<Product> GetAll(string status)
         {
             IEnumerable<Product> products = new List<Product>();
 
             try
             {
-                products = _contextConnection.Product
-                    .Where(x => x.Status == "AC")
-                    .Include(x => x.Category) 
-                    .ToList();//AsEnumerable();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                switch (status)
+                {
+                    case "AC":
+                        products = _contextConnection.Product
+                            .Where(x => x.Status == "AC")
+                            .ToList();
+                        break;
 
-            return products;
+                    case "IN":
+                        products = _contextConnection.Product
+                            .Where(x => x.Status == "IN")
+                            .ToList();
+                        break;
 
-        }
-
-        public IEnumerable<Product> GetAllInactive()
-        {
-            IEnumerable<Product> products = new List<Product>();
-
-            try
-            {
-                products = _contextConnection.Product
-                    .Where(x => x.Status == "IN")
-                    .Include(x => x.Category)
-                    .ToList();
+                    default:
+                        products = _contextConnection.Product
+                            .ToList();
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -113,9 +90,10 @@ namespace POS.Core
             {
                 product = _contextConnection.Product
                     .Where(x => x.IdProduct == id)
+                    .Include(x => x.Category)
                     .FirstOrDefault();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -123,27 +101,12 @@ namespace POS.Core
             return product;
         }
 
-        public void Inactivate(Product product)
-        {
-            try
-            {
-                _contextConnection.Update(product);
-                _contextConnection.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         public void Update(Product product)
         {
             try
             {
-                product.LastUpdateUser = "Update";
-                product.LastUpdateDate = DateTime.Now;
-
                 _contextConnection.Update(product);
+
                 _contextConnection.SaveChanges();
             }
             catch (Exception ex)
@@ -151,7 +114,5 @@ namespace POS.Core
                 throw ex;
             }
         }
-
-        
     }
 }

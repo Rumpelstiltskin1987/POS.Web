@@ -22,7 +22,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="IdWL" class="control-label">Ubicación</label>
-                <select asp-for="IdWL" class="form-control" asp-items="ViewBag.WarehouseLocation">
+                <select asp-for="IdWL" class="form-control" asp-items="ViewBag.WarehouseLocations">
                     <option value="">Seleccione una ubicación</option>
                 </select>
                 <span asp-validation-for="IdWL" class="text-danger"></span>
@@ -30,7 +30,7 @@
             
             <br />
             <div class="form-group">
-                <input type="submit" value="Actualizar" class="btn btn-primary" /> |
+                <input type="submit" value="Actualizar" class="btn btn-primary" />
                 <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
             </div>
         </form>

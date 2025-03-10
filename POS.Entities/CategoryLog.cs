@@ -15,6 +15,6 @@ namespace POS.Entities
         public string? Status { get; set; }
         public string? MovementType { get; set; }    
         public string? LastUpdateUser { get; set; }
-        public DateTime? LastUpdateDate { get; set; }
+        public DateTime? LastUpdateDate { get; set; } = DateTime.Now;
     }
 }

@@ -121,15 +121,17 @@ CREATE TABLE SalesDetail (
 );
 
 CREATE TABLE ApplicationUser (
-    Id TEXT PRIMARY KEY, 
-    UserName TEXT UNIQUE NOT NULL, 
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserName TEXT UNIQUE NOT NULL,
+	FirstName TEXT NOT NULL,
+	LastName TEXT NOT NULL,
     NormalizedUserName TEXT UNIQUE, 
     Email TEXT UNIQUE, 
     NormalizedEmail TEXT UNIQUE, 
     EmailConfirmed INTEGER NOT NULL DEFAULT 0, 
     PasswordHash TEXT, 
     SecurityStamp TEXT, 
-    ConcurrencyStamp TEXT NOT NULL, 
+    ConcurrencyStamp TEXT, 
     PhoneNumber TEXT, 
     PhoneNumberConfirmed INTEGER NOT NULL DEFAULT 0, 
     TwoFactorEnabled INTEGER NOT NULL DEFAULT 0, 

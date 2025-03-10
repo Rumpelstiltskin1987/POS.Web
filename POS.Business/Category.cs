@@ -35,8 +35,7 @@ namespace POS.Business
                 {
                     category.Status = "AC";
                     category.CreateUser = "Alta";
-                    //category.CreateDate = DateTime.Now;
-
+ 
                     _category.Add(category);
 
                     log.IdMovement = 1;
@@ -45,7 +44,6 @@ namespace POS.Business
                     log.Status = category.Status;
                     log.MovementType = "AL";
                     log.LastUpdateUser = category.CreateUser;
-                    log.LastUpdateDate = category.CreateDate;
 
                     _categoryLog.AddLog(log);
 
@@ -58,7 +56,8 @@ namespace POS.Business
                 }
                 finally
                 {
-                    this._category.Dispose();
+                    _category.Dispose();
+                    _categoryLog.Dispose();
                 }
             }
         }
@@ -116,46 +115,6 @@ namespace POS.Business
                 _category.Dispose();
             }
         }
-
-        public void Inactivate(Category category)
-        {
-            CategoryLog log = new();
-
-            using (var transaction = _contextConnection.Database.BeginTransaction())
-            {
-                try
-                {
-                    category.Status = "IN";
-                    category.LastUpdateUser = "Update";
-                    category.LastUpdateDate = DateTime.Now;
-
-                    _category.Inactivate(category);
-
-                    log.IdMovement = _categoryLog.GetIdMovement(category.IdCategory) + 1;
-                    log.IdCategory = category.IdCategory;
-                    log.Name = category.Name;
-                    log.Status = category.Status;
-                    log.MovementType = "ED";
-                    log.LastUpdateUser = "Editar";
-                    log.LastUpdateDate = category.LastUpdateDate;
-
-                    _categoryLog.AddLog(log);
-
-                    transaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    throw ex;
-                }
-                finally
-                {
-                    _category.Dispose();
-                    _categoryLog.Dispose();
-                }
-            }
-        }
-
         public void Update(Category category)
         {
             CategoryLog log = new();
@@ -175,7 +134,6 @@ namespace POS.Business
                     log.Status = category.Status;
                     log.MovementType = "ED";
                     log.LastUpdateUser = "Editar";
-                    log.LastUpdateDate = category.LastUpdateDate;
 
                     _categoryLog.AddLog(log);
 

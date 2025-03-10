@@ -35,8 +35,6 @@ namespace POS.Core
 
         public void Delete(int id)
         {
-            Category category = new();
-
             try
             {
                 _contextConnection.Category
@@ -118,20 +116,6 @@ namespace POS.Core
             }
 
             return idCategory;
-        }
-
-        public void Inactivate(Category category)
-        {
-            try
-            {
-                _contextConnection.Update(category);
-
-                _contextConnection.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
         }
 
         public void Update(Category category)

@@ -93,11 +93,7 @@ namespace POS.Web.Controllers
 
         // GET: Warehouses/Edit/5
         public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        {            
             IEnumerable<WarehouseLocation> wl = new List<WarehouseLocation>();
 
             wl = _context.WarehouseLocation;
@@ -105,7 +101,7 @@ namespace POS.Web.Controllers
             var WarehouseLocation = wl.Select(c => new SelectListItem { Value = c.IdWL.ToString(), Text = c.Address })
                 .ToList();
 
-            ViewData["WarehouseLocation"] = WarehouseLocation;
+            ViewData["WarehouseLocations"] = WarehouseLocation;
 
             var warehouse = await _context.Warehouse.FindAsync(id);
             if (warehouse == null)

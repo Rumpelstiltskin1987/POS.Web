@@ -9,13 +9,10 @@ namespace POS.Interfaces
 {
     public interface IProduct
     {
-        string Add(Product product);
-        string Delete(int id);
-        IEnumerable<Product> GetAll();
-        IEnumerable<Product> GetAllInactive();
-        Product GetById(int id);
-        //IEnumerable<Product> Find(Expression<Product> exp);        
-        void Inactivate(Product product);
+        void Add(Product product);
+        void Delete(int id);
+        IEnumerable<Product> GetAll(string status);
+        Product GetById(int id);       
         void Update(Product product);
     }
 }

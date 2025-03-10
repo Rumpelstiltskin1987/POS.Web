@@ -21,7 +21,7 @@ namespace POS.Business
             _productLog = new CoreProductLog(_contextConnection);
         }
 
-        public string Add(Product product)
+        public void Add(Product product)
         {
             ProductLog log = new();
             string menssage = string.Empty;
@@ -30,7 +30,10 @@ namespace POS.Business
             {
                 try
                 {
-                    menssage = _product.Add(product);
+                    product.Status = "AC";
+                    product.CreateUser = "Alta";
+
+                    _product.Add(product);
 
                     log.IdMovement = 1;
                     log.IdProduct = product.IdProduct;
@@ -43,7 +46,6 @@ namespace POS.Business
                     log.Status = product.Status;
                     log.MovementType = "AL";
                     log.LastUpdateUser = product.CreateUser;
-                    log.LastUpdateDate = product.CreateDate;
 
                     _productLog.AddLog(log);
 
@@ -59,40 +61,40 @@ namespace POS.Business
                     _product.Dispose();
                     _productLog.Dispose();
                 }
-            }
-
-            return menssage;    
+            }  
         }
 
-        public string Delete(int id)
+        public void Delete(int id)
+        {
+            using (var transaction = _contextConnection.Database.BeginTransaction())
+            {
+                try
+                {
+                    _product.Delete(id);
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    _product.Dispose();
+                }
+            } 
+        }
+
+        public IEnumerable<Product> GetAll(string status)
         {
             try
             {
-                return _product.Delete(id);
+                return _product.GetAll(status);
             }
-            finally
+            catch (Exception ex)
             {
-                _product.Dispose();
-            }
-        }
-
-        public IEnumerable<Product> GetAll()
-        {
-            try
-            {
-                return _product.GetAll();
-            }
-            finally
-            {
-                _product.Dispose();
-            }
-        }
-
-        public IEnumerable<Product> GetAllInactive()
-        {
-            try
-            {
-                return _product.GetAllInactive();
+                throw ex;
             }
             finally
             {
@@ -106,25 +108,28 @@ namespace POS.Business
             {
                 return _product.GetById(id);
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
                 _product.Dispose();
             }
         }
 
-        public void Inactivate(Product product)
+        public void Update(Product product)
         {
-            ProductLog log = new();
-
             using (var transaction = _contextConnection.Database.BeginTransaction())
             {
+                ProductLog log = new();
+
                 try
                 {
-                    product.Status = "IN";
                     product.LastUpdateUser = "Update";
                     product.LastUpdateDate = DateTime.Now;
 
-                    _product.Inactivate(product);
+                    _product.Update(product);
 
                     log.IdMovement = _productLog.GetIdMovement(product.IdCategory) + 1;
                     log.IdProduct = product.IdProduct;
@@ -136,8 +141,7 @@ namespace POS.Business
                     log.UrlImage = product.UrlImage;
                     log.Status = product.Status;
                     log.MovementType = "ED";
-                    log.LastUpdateUser = "Editar";
-                    log.LastUpdateDate = product.LastUpdateDate;
+                    log.LastUpdateUser = product.CreateUser;
 
                     _productLog.AddLog(log);
 
@@ -152,26 +156,6 @@ namespace POS.Business
                 {
                     _product.Dispose();
                     _productLog.Dispose();
-                }
-            }
-        }
-
-        public void Update(Product product)
-        {
-            using (var transaction = _contextConnection.Database.BeginTransaction())
-            {
-                try
-                {
-                    _product.Update(product);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    throw ex;
-                }
-                finally
-                {
-                    _product.Dispose();
                 }
             }
         }

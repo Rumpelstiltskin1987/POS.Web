@@ -12,7 +12,7 @@
     <div class="col-md-4">
         <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdProduct" />
+            <input type="hidden" asp-for="IdProduct" />            
             <input type="hidden" asp-for="Status" />
             <input type="hidden" asp-for="CreateUser" />
             <input type="hidden" asp-for="CreateDate" />
@@ -22,8 +22,20 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Description" class="control-label">Descripción</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="IdCategory" class="control-label">Categoría</label>
                 <input asp-for="IdCategory" class="form-control" />
+                <span asp-validation-for="IdCategory" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdCategory" class="control-label">Ubicación</label>
+                <select asp-for="IdCategory" class="form-control" asp-items="ViewBag.Categories">
+                    <option value="">Seleccione una categoría</option>
+                </select>
                 <span asp-validation-for="IdCategory" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -47,7 +59,7 @@
             </div>
             <br />
             <div class="form-group">
-                <input type="submit" value="Actualizar" class="btn btn-primary" /> |
+                <input type="submit" value="@ViewData["Option"]" class="@ViewData["btn-class"]" />
                 <a class="btn btn-secondary" asp-action="Index">Volver al listado</a>
             </div>
         </form>
@@ -63,7 +75,7 @@
             var urlImageInput = document.getElementById('UrlImage');
             if (input.files.length > 0) {
                 var fileName = input.files[0].name;
-                urlImageInput.value = '\\images\\' + fileName;
+                urlImageInput.value = '\\images\\products\\' + fileName;
             }
         }
     </script>

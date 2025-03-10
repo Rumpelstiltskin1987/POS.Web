@@ -11,6 +11,7 @@ using POS.Business;
 using POS.Entities;
 
 using SQLitePCL;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace POS.Web.Controllers
 {
@@ -37,11 +38,12 @@ namespace POS.Web.Controllers
                 switch (status)
                 {
                     case "AC":
-                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activas";
                         ViewData["asp-route"] = "IN";
                         ViewData["asp-button"] = "Categorías Inactivas";
                         ViewData["asp-action"] = "Edit";
+                        ViewData["option"] = "Inactivar";
                         break;
                     case "IN":
                         ViewData["txtButton"] = "Activar";
@@ -49,12 +51,14 @@ namespace POS.Web.Controllers
                         ViewData["asp-route"] = "AC";
                         ViewData["asp-button"] = "Categorías Activas";
                         ViewData["asp-action"] = "Edit";
+                        ViewData["option"] = "Activar";
                         break;
                     default:
-                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activas";
                         ViewData["asp-route"] = "IN";
                         ViewData["asp-button"] = "Categorías Inactivas";
+                        ViewData["option"] = "Inactivar";
                         break;
                 }
 
@@ -145,6 +149,8 @@ namespace POS.Web.Controllers
         {
             Category category = new Category();
 
+            string txtbutton = string.Empty;
+
             try
             {
                 category = _manageCategory.GetById(id);
@@ -170,10 +176,12 @@ namespace POS.Web.Controllers
             {
                 case "Activar":
                     category.Status = "AC";
+                    txtbutton = "Activar";
                     ViewData["btn-class"] = "btn btn-success";
                      break;
                 case "Inactivar":
                     category.Status = "IN";
+                    txtbutton = "Dar de baja";
                     ViewData["btn-class"] = "btn btn-warning";
                     break;
                 default:
@@ -181,7 +189,7 @@ namespace POS.Web.Controllers
                     break;
             }
 
-            ViewData["Option"] = option;
+            ViewData["txtbutton"] = txtbutton;
 
             return View(category);
         }

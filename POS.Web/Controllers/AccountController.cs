@@ -32,8 +32,7 @@ namespace POS.Controllers
         {
             try
             {
-                var user = await _context.ApplicationUser
-                    .FirstOrDefaultAsync(u => u.UserName == username && u.PasswordHash == password);
+                var user = await _context.ApplicationUser.FirstOrDefaultAsync(u => u.UserName == username);
 
                 if (user == null)
                 {
@@ -41,12 +40,22 @@ namespace POS.Controllers
                     return View();
                 }
 
+                // Verificar la contraseña con el hasher
+                var passwordHasher = new PasswordHasher<ApplicationUser>();
+                var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+
+                if (result != PasswordVerificationResult.Success)
+                {
+                    ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                    return View();
+                }
+
                 var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim("FullName", $"{user.FirstName} {user.LastName}"),
-                new Claim(ClaimTypes.Email, user.Email ?? "")
-            };
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim("FullName", $"{user.FirstName} {user.LastName}"),
+            new Claim(ClaimTypes.Email, user.Email ?? "")
+        };
 
                 var identity = new ClaimsIdentity(claims, "SmartStockAuth");
                 var principal = new ClaimsPrincipal(identity);
@@ -55,18 +64,19 @@ namespace POS.Controllers
 
                 return RedirectToAction("Index", "Home");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return View("Error", new ErrorViewModel
                 {
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException?.Message ?? "No hay excepción interna",  // ✅ Verifica si InnerException es null
+                    InnerExceptionMessage = ex.InnerException?.Message ?? "No hay excepción interna",
                     InnerExceptionSource = ex.InnerException?.Source ?? "No hay excepción interna"
                 });
             }
         }
+
 
         // GET: Account/Register
         public IActionResult Register()
@@ -88,6 +98,10 @@ namespace POS.Controllers
                     ModelState.AddModelError("", "El nombre de usuario ya está en uso.");
                     return View(model);
                 }
+
+                // Hashear la contraseña antes de almacenarla
+                var passwordHasher = new PasswordHasher<ApplicationUser>();
+                model.PasswordHash = passwordHasher.HashPassword(model, model.PasswordHash);
 
                 _context.ApplicationUser.Add(model);
                 await _context.SaveChangesAsync();
