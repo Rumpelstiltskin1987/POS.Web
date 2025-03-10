@@ -86,6 +86,7 @@ namespace POS.Web.Controllers
                 warehouse.CreateUser = "Alta";
                 _context.Add(warehouse);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Registro de almacén exitoso";
                 return RedirectToAction(nameof(Index));
             }
             return View(warehouse);

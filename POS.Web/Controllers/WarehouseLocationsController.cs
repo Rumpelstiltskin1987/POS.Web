@@ -61,6 +61,7 @@ namespace POS.Web.Controllers
             {
                 _context.Add(warehouseLocation);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Registro de ubicación exitoso";
                 return RedirectToAction(nameof(Index));
             }
             return View(warehouseLocation);

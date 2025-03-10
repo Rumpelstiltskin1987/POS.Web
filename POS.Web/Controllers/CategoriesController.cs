@@ -127,6 +127,8 @@ namespace POS.Web.Controllers
                 {
                     _manageCategory.Add(category);
 
+                    TempData["SuccessMessage"] = "Registro de categoría exitoso";
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
@@ -185,6 +187,7 @@ namespace POS.Web.Controllers
                     ViewData["btn-class"] = "btn btn-warning";
                     break;
                 default:
+                    txtbutton = "Actualizar";
                     ViewData["btn-class"] = "btn btn-primary";
                     break;
             }
@@ -212,6 +215,10 @@ namespace POS.Web.Controllers
                 try
                 {
                     _manageCategory.Update(category);
+
+                    TempData["SuccessMessage"] = "Actulización de categoría exitosa";
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -234,9 +241,7 @@ namespace POS.Web.Controllers
                         InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
                         InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
-                }
-
-                return RedirectToAction(nameof(Index));
+                }                
             }
             return View(category);
         }

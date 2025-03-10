@@ -145,6 +145,8 @@ namespace POS.Web.Controllers
                         }
                     }
 
+                    TempData["SuccessMessage"] = "Registro de producto exitoso";
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
@@ -175,7 +177,9 @@ namespace POS.Web.Controllers
         public async Task<IActionResult> Edit(int id, string option)
         {
             Product product = new Product();
-          
+
+            string txtbutton = string.Empty;
+
             try
             {
                 product = _manageProduct.GetById(id);
@@ -208,18 +212,21 @@ namespace POS.Web.Controllers
                 {
                     case "Activar":
                         product.Status = "AC";
+                        txtbutton = "Activar";
                         ViewData["btn-class"] = "btn btn-success";
                         break;
                     case "Inactivar":
                         product.Status = "IN";
+                        txtbutton = "Dar de baja";
                         ViewData["btn-class"] = "btn btn-warning";
                         break;
                     default:
+                        txtbutton = "Actualizar";
                         ViewData["btn-class"] = "btn btn-primary";
                         break;
                 }
 
-                ViewData["Option"] = option;
+                ViewData["txtbutton"] = txtbutton;
 
                 return View(product);
             }

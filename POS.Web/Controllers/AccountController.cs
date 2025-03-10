@@ -36,7 +36,7 @@ namespace POS.Controllers
 
                 if (user == null)
                 {
-                    ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                    ModelState.AddModelError("", "No existe el usuario " + username);
                     return View();
                 }
 
@@ -46,16 +46,16 @@ namespace POS.Controllers
 
                 if (result != PasswordVerificationResult.Success)
                 {
-                    ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                    ModelState.AddModelError("", "Contraseña incorrecta.");
                     return View();
                 }
 
                 var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim("FullName", $"{user.FirstName} {user.LastName}"),
-            new Claim(ClaimTypes.Email, user.Email ?? "")
-        };
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim("FullName", $"{user.FirstName} {user.LastName}"),
+                    new Claim(ClaimTypes.Email, user.Email ?? "")
+                };
 
                 var identity = new ClaimsIdentity(claims, "SmartStockAuth");
                 var principal = new ClaimsPrincipal(identity);

@@ -59,17 +59,20 @@ namespace POS.Core
                     case "AC":
                         products = _contextConnection.Product
                             .Where(x => x.Status == "AC")
+                            .Include(x => x.Category)
                             .ToList();
                         break;
 
                     case "IN":
                         products = _contextConnection.Product
                             .Where(x => x.Status == "IN")
+                            .Include(x => x.Category)
                             .ToList();
                         break;
 
                     default:
                         products = _contextConnection.Product
+                            .Include(x => x.Category)
                             .ToList();
                         break;
                 }
