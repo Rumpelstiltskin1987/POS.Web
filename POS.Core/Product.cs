@@ -48,6 +48,26 @@ namespace POS.Core
             }
         }
 
+        public IEnumerable<Product> Find(Expression<Func<Product,bool>> expression)
+        {
+            //Expression<Func<DataAccess.TransfRequest, bool>> expression = null;
+            //expression = x => x.RequestStatus == status;
+            //expression = expression.And(x => x.MaterialType == "PE");
+
+            IEnumerable<Product> products = new List<Product>();
+
+            try
+            {
+                products = _contextConnection.Product.Where(expression).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return products;
+        }
+
         public IEnumerable<Product> GetAll(string status)
         {
             IEnumerable<Product> products = new List<Product>();

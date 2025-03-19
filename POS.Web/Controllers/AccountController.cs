@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System;
 using POS.Web.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace POS.Controllers
 {
@@ -44,6 +45,7 @@ namespace POS.Controllers
                 var passwordHasher = new PasswordHasher<ApplicationUser>();
                 var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
+
                 if (result != PasswordVerificationResult.Success)
                 {
                     ModelState.AddModelError("", "Contraseña incorrecta.");
@@ -57,10 +59,10 @@ namespace POS.Controllers
                     new Claim(ClaimTypes.Email, user.Email ?? "")
                 };
 
-                var identity = new ClaimsIdentity(claims, "SmartStockAuth");
+                var identity = new ClaimsIdentity(claims, "SmartStockAuth");                
                 var principal = new ClaimsPrincipal(identity);
 
-                await HttpContext.SignInAsync(principal);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
                 return RedirectToAction("Index", "Home");
             }

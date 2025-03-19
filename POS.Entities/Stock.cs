@@ -16,12 +16,12 @@ namespace POS.Entities
         [Required(ErrorMessage = "El Almacén es obligatorio.")]
         [ForeignKey("Warehouse")]
         public int IdWarehouse { get; set; }
-        public Warehouse? Warehouse { get; set; }
+        public virtual Warehouse? Warehouse { get; set; }
 
         [Required(ErrorMessage = "El Producto es obligatorio.")]
         [ForeignKey("Product")]
         public int IdProduct { get; set; }
-        public Product? Product { get; set; }
+        public virtual Product? Product { get; set; }
 
         [Required(ErrorMessage = "La Cantidad es obligatoria.")]
         [Range(1, int.MaxValue, ErrorMessage = "El stock debe ser mayor que cero.")]

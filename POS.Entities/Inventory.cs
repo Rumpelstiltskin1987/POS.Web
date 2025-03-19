@@ -14,7 +14,7 @@ namespace POS.Entities
         [Required]
         [ForeignKey("Stock")]
         public int IdStock { get; set; }
-        public Stock? Stock { get; set; }
+        public virtual Stock? Stock { get; set; }
         [Required]  
         public string? MovementType { get; set; }
         [Required]

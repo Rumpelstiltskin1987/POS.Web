@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Diagnostics;
 using POS.Web.Models;
 using POS.Business;
@@ -125,6 +126,8 @@ namespace POS.Web.Controllers
             {
                 try
                 {
+                    var userName = GetUserName();
+
                     _manageCategory.Add(category);
 
                     TempData["SuccessMessage"] = "Registro de categoría exitoso";
@@ -303,5 +306,19 @@ namespace POS.Web.Controllers
         {
             return _context.Category.Any(e => e.IdCategory == id);
         }
+
+        public IActionResult GetUserName()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userName = User.Identity.Name;
+                return Content($"Usuario autenticado: {userName}");
+            }
+            else
+            {
+                return Content("No hay usuario autenticado");
+            }
+        }
+
     }
 }

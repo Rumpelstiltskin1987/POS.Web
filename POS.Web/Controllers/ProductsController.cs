@@ -348,10 +348,11 @@ namespace POS.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Productos/Delete/5
-        public async Task<IActionResult> Inactivate(int id)
+        private bool ProductsExists(int id)
         {
             Product product = new();
+
+            bool exist = false;
 
             try
             {
@@ -359,54 +360,11 @@ namespace POS.Web.Controllers
             }
             catch (Exception ex)
             {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    Message = ex.Message,
-                    Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
-                });
-            }
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return View(product);
-            }
-        }
-
-        // POST: Productos/Delete/5
-        [HttpPost, ActionName("Inactivate")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> InactivateConfirmed(int id, [Bind("IdProduct,Name,Description,IdCategory,Price,MeasureUnit,Status," +
-            "UrlImage,CreateUser,CreateDate")] Product product)
-        {
-            try
-            {
+                throw ex;
 
             }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    Message = ex.Message,
-                    Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
-                });
-            }
 
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductsExists(int id)
-        {
-            return _context.Product.Any(e => e.IdProduct == id);
+            return exist;
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

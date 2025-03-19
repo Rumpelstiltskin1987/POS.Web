@@ -131,7 +131,7 @@ namespace POS.Business
 
                     _product.Update(product);
 
-                    log.IdMovement = _productLog.GetIdMovement(product.IdCategory) + 1;
+                    log.IdMovement = _productLog.GetIdMovement(product.IdProduct) + 1;
                     log.IdProduct = product.IdProduct;
                     log.Name = product.Name;
                     log.Description = product.Description;

@@ -22,7 +22,7 @@ namespace POS.Entities
         [Required(ErrorMessage = "La categoría es obligatoria.")]
         [ForeignKey("Category")]
         public int IdCategory { get; set; }
-        public Category? Category { get; set; }
+        public virtual Category? Category { get; set; }
 
         [Required(ErrorMessage = "El precio es obligatorio.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que cero.")]
