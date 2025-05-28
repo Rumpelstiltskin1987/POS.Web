@@ -34,7 +34,6 @@ namespace POS.Core
 
         public void Delete(int id)
         {
-
             try
             {
                 _contextConnection.Product

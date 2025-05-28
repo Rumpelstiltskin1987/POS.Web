@@ -24,8 +24,7 @@ namespace POS.Business
         public void Add(Product product)
         {
             ProductLog log = new();
-            string menssage = string.Empty;
-
+            
             using (var transaction = _contextConnection.Database.BeginTransaction())
             {
                 try

@@ -1,0 +1,9 @@
+drop table Category;
+drop table CategoryLog;
+drop table Product;
+drop table ProductLog;
+drop table Warehouse;
+drop table WarehouseLocation;
+drop table Inventory;
+drop table Sales;
+drop table SalesDetail;

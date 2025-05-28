@@ -8,15 +8,27 @@ namespace POS.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private string _userName;
         
 
         public HomeController(ILogger<HomeController> logger, MySQLiteContext context)
         {
             _logger = logger;
+            _userName = string.Empty;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string username)
         {
+            if (!string.IsNullOrEmpty(username))
+            {
+                _userName = username;
+                ViewData["User"] = _userName;
+            }
+            else
+            {
+                ViewData["User"] = "Invitado";
+            } 
+            
             return View();
         }
 

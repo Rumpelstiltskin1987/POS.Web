@@ -158,6 +158,10 @@ namespace POS.Entities
             {
                 entity.HasKey(e => e.IdWL);
                 entity.Property(e => e.Address).IsRequired();
+                entity.Property(e => e.CreateUser).IsRequired();
+                entity.Property(e => e.CreateDate).IsRequired();
+                entity.Property(e => e.LastUpdateUser);
+                entity.Property(e => e.LastUpdateDate);
             });
         }
     }

@@ -9,6 +9,7 @@ using System;
 using POS.Web.Models;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using POS.Interfaces;
 
 namespace POS.Controllers
 {
@@ -64,7 +65,8 @@ namespace POS.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                return RedirectToAction("Index", "Home");
+
+                return RedirectToAction("Index", "Home", new { userName = user.UserName });
             }
             catch (Exception ex)
             {

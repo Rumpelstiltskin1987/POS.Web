@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using POS.Business;
 using POS.Entities;
+using POS.Interfaces;
 using POS.Web.Models;
 
 namespace POS.Web.Controllers
@@ -14,34 +16,67 @@ namespace POS.Web.Controllers
     public class WarehouseLocationsController : Controller
     {
         private readonly MySQLiteContext _context;
+        private readonly BusinessWarehouseLocation _manageWarehouseLocation;
 
         public WarehouseLocationsController(MySQLiteContext context)
         {
             _context = context;
+            _manageWarehouseLocation = new BusinessWarehouseLocation(_context);
         }
 
         // GET: WarehouseLocations
         public async Task<IActionResult> Index()
         {
-            return View(await _context.WarehouseLocation.ToListAsync());
+            IEnumerable<WarehouseLocation> warehousLocations = new List<WarehouseLocation>();
+            try
+            {
+                warehousLocations = _manageWarehouseLocation.GetAll();
+
+                return View(warehousLocations);
+
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
+            }
         }
 
         // GET: WarehouseLocations/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            WarehouseLocation warehouseLocation = new();
+
+            try
             {
-                return NotFound();
+                warehouseLocation = _manageWarehouseLocation.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            var warehouseLocation = await _context.WarehouseLocation
-                .FirstOrDefaultAsync(m => m.IdWL == id);
             if (warehouseLocation == null)
             {
                 return NotFound();
             }
-
-            return View(warehouseLocation);
+            else
+            {
+                return View(warehouseLocation);
+            }
         }
 
         // GET: WarehouseLocations/Create
@@ -59,27 +94,46 @@ namespace POS.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(warehouseLocation);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Registro de ubicación exitoso";
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    warehouseLocation.CreateUser = "Alta";
+
+                    _manageWarehouseLocation.Add(warehouseLocation);
+
+                    TempData["SuccessMessage"] = "Registro de dirección exitoso";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                    });
+                }
             }
-            return View(warehouseLocation);
+            else
+            {
+                return View(warehouseLocation);
+            }
         }
 
         // GET: WarehouseLocations/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            WarehouseLocation warehouseLocation = new();
 
-            var warehouseLocation = await _context.WarehouseLocation.FindAsync(id);
+            warehouseLocation = _manageWarehouseLocation.GetById(id);
+
             if (warehouseLocation == null)
             {
                 return NotFound();
             }
+
             return View(warehouseLocation);
         }
 
@@ -90,17 +144,18 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdWL,Address")] WarehouseLocation warehouseLocation)
         {
-            if (id != warehouseLocation.IdWL)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(warehouseLocation);
-                    await _context.SaveChangesAsync();
+                    warehouseLocation.LastUpdateUser = "Editar";
+                    warehouseLocation.LastUpdateDate = DateTime.Now;
+
+                    _manageWarehouseLocation.Update(warehouseLocation);
+
+                    TempData["SuccessMessage"] = "Actualización de datos exitosa";
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -113,27 +168,51 @@ namespace POS.Web.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                    });
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(warehouseLocation);
         }
 
         // GET: WarehouseLocations/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
+            WarehouseLocation warehouseLocation = new();
+
+            try
             {
-                return NotFound();
+                warehouseLocation = _manageWarehouseLocation.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            var warehouseLocation = await _context.WarehouseLocation
-                .FirstOrDefaultAsync(m => m.IdWL == id);
             if (warehouseLocation == null)
             {
                 return NotFound();
             }
-
-            return View(warehouseLocation);
+            else
+            {
+                return View(warehouseLocation);
+            }
         }
 
         // POST: WarehouseLocations/Delete/5
@@ -141,33 +220,47 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var warehouseLocation = await _context.WarehouseLocation.FindAsync(id);
-            if (warehouseLocation != null)
+            try
             {
-                _context.WarehouseLocation.Remove(warehouseLocation);
+                _manageWarehouseLocation.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> Inactivate(int? id)
-        {
-
-            return View("Error", new ErrorViewModel
-            {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                Message = "Pagina en construcción",
-                Source = "Inactivar Ubicación",
-                InnerExceptionMessage = "",
-                InnerExceptionSource = ""
-            });
-
         }
 
         private bool WarehouseLocationExists(int id)
         {
-            return _context.WarehouseLocation.Any(e => e.IdWL == id);
+            WarehouseLocation warehouseLocation = new();
+
+            bool exist = false;
+
+            try
+            {
+                warehouseLocation = _manageWarehouseLocation.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return exist;
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

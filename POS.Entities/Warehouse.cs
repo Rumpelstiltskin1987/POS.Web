@@ -13,7 +13,7 @@ namespace POS.Entities
 
         [Required(ErrorMessage = "La Dirección es obligatoria.")]
         [ForeignKey("WarehouseLocation")]
-        public int IdWL { get; set; } 
+        public int IdWL { get; set; }
         public virtual WarehouseLocation? WarehouseLocation { get; set; } 
         public string? CreateUser { get; set; }
         public DateTime CreateDate { get; set; } = DateTime.Now;

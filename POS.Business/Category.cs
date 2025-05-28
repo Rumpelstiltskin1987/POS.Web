@@ -32,10 +32,7 @@ namespace POS.Business
             using (var transaction = _contextConnection.Database.BeginTransaction())
             {
                 try
-                {
-                    category.Status = "AC";
-                    category.CreateUser = "Alta";
- 
+                { 
                     _category.Add(category);
 
                     log.IdMovement = 1;

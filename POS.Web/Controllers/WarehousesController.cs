@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using POS.Business;
 using POS.Entities;
 using POS.Web.Models;
 
@@ -14,18 +15,26 @@ namespace POS.Web.Controllers
     public class WarehousesController : Controller
     {
         private readonly MySQLiteContext _context;
+        private readonly BusinessWarehouse _manageWarehouse;
+        private readonly BusinessWarehouseLocation _manageWarehouseLocation;
 
         public WarehousesController(MySQLiteContext context)
         {
             _context = context;
-        }
+            _manageWarehouse = new BusinessWarehouse(_context);
+            _manageWarehouseLocation = new BusinessWarehouseLocation(_context);
+        } 
 
         // GET: Warehouses
         public async Task<IActionResult> Index()
         {
+            IEnumerable<Warehouse> warehouses = new List<Warehouse>();
             try
             {
-                return View(await _context.Warehouse.Include(x => x.WarehouseLocation).ToListAsync());
+                warehouses = _manageWarehouse.GetAll();
+
+                return View(warehouses);
+
             }
             catch (Exception ex)
             {
@@ -34,42 +43,51 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
         }
 
         // GET: Warehouses/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            Warehouse warehouse = new();
+
+            try
             {
-                return NotFound();
+                warehouse = _manageWarehouse.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            var warehouse = await _context.Warehouse
-                .Include(m => m.WarehouseLocation)
-                .FirstOrDefaultAsync(m => m.IdWarehouse == id);
             if (warehouse == null)
             {
                 return NotFound();
             }
-
-            return View(warehouse);
+            else
+            {
+                return View(warehouse);
+            }
         }
 
         // GET: Warehouses/Create
         public IActionResult Create()
         {
-            IEnumerable<WarehouseLocation> wl = new List<WarehouseLocation>();
+            IEnumerable<WarehouseLocation> warehouseLocations = [];
 
-            wl = _context.WarehouseLocation;
+            warehouseLocations = _manageWarehouseLocation.GetAll();
 
-            var WarehouseLocation = wl.Select(c => new SelectListItem { Value = c.IdWL.ToString(), Text = c.Address })
-                .ToList();
-
-            ViewData["WarehouseLocation"] = WarehouseLocation;
+            ViewData["WarehouseLocation"] = warehouseLocations;
 
             return View();
         }
@@ -83,32 +101,57 @@ namespace POS.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                warehouse.CreateUser = "Alta";
-                _context.Add(warehouse);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Registro de almacén exitoso";
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    warehouse.CreateUser = "Alta";
+
+                    _manageWarehouse.Add(warehouse);
+
+                    TempData["SuccessMessage"] = "Registro de almacén exitoso";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                    });
+                }
             }
-            return View(warehouse);
+            else
+            {
+                IEnumerable<WarehouseLocation> warehouseLocations = [];
+
+                warehouseLocations = _manageWarehouseLocation.GetAll();
+
+                ViewData["WarehouseLocation"] = warehouseLocations;
+
+                return View(warehouse);
+            }
         }
 
         // GET: Warehouses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {            
-            IEnumerable<WarehouseLocation> wl = new List<WarehouseLocation>();
+        public async Task<IActionResult> Edit(int id)
+        {
+            Warehouse warehouse = new();
+            IEnumerable<WarehouseLocation> warehouseLocations = [];
 
-            wl = _context.WarehouseLocation;
+            warehouseLocations = _manageWarehouseLocation.GetAll();
 
-            var WarehouseLocation = wl.Select(c => new SelectListItem { Value = c.IdWL.ToString(), Text = c.Address })
-                .ToList();
+            ViewData["WarehouseLocation"] = warehouseLocations;
 
-            ViewData["WarehouseLocations"] = WarehouseLocation;
+            warehouse = _manageWarehouse.GetById(id);  
 
-            var warehouse = await _context.Warehouse.FindAsync(id);
             if (warehouse == null)
             {
                 return NotFound();
             }
+
             return View(warehouse);
         }
 
@@ -119,11 +162,6 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdWarehouse,Name,IdWL,CreateUser,CreateDate")] Warehouse warehouse)
         {
-            if (id != warehouse.IdWarehouse)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -131,8 +169,11 @@ namespace POS.Web.Controllers
                     warehouse.LastUpdateUser = "Editar";
                     warehouse.LastUpdateDate = DateTime.Now;
 
-                    _context.Update(warehouse);
-                    await _context.SaveChangesAsync();
+                    _manageWarehouse.Update(warehouse); 
+
+                    TempData["SuccessMessage"] = "Actualización de datos exitosa";
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -145,27 +186,53 @@ namespace POS.Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    return View("Error", new ErrorViewModel
+                    {
+                        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                        Message = ex.Message,
+                        Source = ex.Source,
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                    });
+                }                
             }
-            return View(warehouse);
+            else
+            {
+                return View(warehouse);
+            }
         }
 
         // GET: Warehouses/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
+            Warehouse warehouse = new();
+
+            try
             {
-                return NotFound();
+                warehouse = _manageWarehouse.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            var warehouse = await _context.Warehouse
-                .FirstOrDefaultAsync(m => m.IdWarehouse == id);
             if (warehouse == null)
             {
                 return NotFound();
             }
-
-            return View(warehouse);
+            else
+            {
+                return View(warehouse);
+            }
         }
 
         // POST: Warehouses/Delete/5
@@ -173,33 +240,48 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var warehouse = await _context.Warehouse.FindAsync(id);
-            if (warehouse != null)
+            try
             {
-                _context.Warehouse.Remove(warehouse);
+                _manageWarehouse.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    Message = ex.Message,
+                    Source = ex.Source,
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
+                });
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        public async Task<IActionResult> Inactivate(int? id)
-        {
-
-            return View("Error", new ErrorViewModel
-            {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                Message = "Pagina en construcción",
-                Source = "Inactivar Amacén",
-                InnerExceptionMessage = "",
-                InnerExceptionSource = ""
-            });
-
         }
 
         private bool WarehouseExists(int id)
         {
-            return _context.Warehouse.Any(e => e.IdWarehouse == id);
+            Warehouse warehouse = new();
+
+            bool exist = false;
+
+            try
+            {
+                warehouse = _manageWarehouse.GetById(id);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+
+            }
+
+            return exist;
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

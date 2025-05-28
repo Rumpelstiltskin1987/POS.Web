@@ -125,8 +125,6 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage")] Product product, IFormFile? ProductImage)
         {
-            string message = string.Empty;
-
             if (ModelState.IsValid)
             {
                 try
@@ -240,8 +238,6 @@ namespace POS.Web.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("IdProduct,Name,Description,IdCategory,Price,Stock,MeasureUnit," +
             "UrlImage,Status,CreateUser,CreateDate")] Product product, IFormFile? ProductImage)
         {
-            string message = string.Empty;
-
             if (ModelState.IsValid)
             {
                 try
@@ -327,8 +323,6 @@ namespace POS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            string message = string.Empty;
-
             try
             {
                 _manageProduct.Delete(id);

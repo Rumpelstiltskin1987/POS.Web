@@ -24,7 +24,7 @@
 <h1>Categorías @ViewData["txtTitle"]</h1>
 
 <p>
-    <a class="btn btn-success" asp-action="Create">Agregar Categoría</a>
+    <a class="btn btn-success" asp-action="Create" asp-route-username="@ViewData["User"]">Agregar Categoría</a>
     <a class="btn btn-secondary" asp-action="Index" asp-route-status="@ViewData["asp-route"]">
         @ViewData["asp-button"]
     </a>

@@ -28,8 +28,17 @@ namespace POS.Web.Controllers
         }
 
         // GET: Categorys
-        public async Task<IActionResult> Index(string status = "AC")
+        public async Task<IActionResult> Index(string username, string status = "AC")
         {
+            if (!string.IsNullOrEmpty(username))
+            {
+                ViewData["User"] = username;
+            }
+            else
+            {
+                ViewData["User"] = "Invitado";
+            }
+
             try
             {
                 IEnumerable<Category> categories = new List<Category>();
@@ -110,8 +119,9 @@ namespace POS.Web.Controllers
         }
 
         // GET: Categorys/Create
-        public IActionResult Create()
+        public IActionResult Create(string username)
         {
+            ViewData["User"] = username;
             return View();
         }
 
@@ -120,19 +130,17 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCategory,Name")] Category category)
+        public async Task<IActionResult> Create([Bind("IdCategory,Name,CreateUser,Status")] Category category)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var userName = GetUserName();
-
                     _manageCategory.Add(category);
 
                     TempData["SuccessMessage"] = "Registro de categoría exitoso";
 
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { username = category.CreateUser });
                 }
                 catch (Exception ex)
                 {
