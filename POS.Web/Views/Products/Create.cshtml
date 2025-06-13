@@ -48,6 +48,16 @@
                 <label for="ProductImage" class="control-label">Imagen del Producto</label>
                 <input type="file" id="ProductImage" name="ProductImage" class="form-control" onchange="updateUrlImage()" />
             </div>
+            <div class="form-group" style="display:none;">
+                <label asp-for="CreateUser" class="control-label"></label>
+                <input asp-for="CreateUser" class="form-control" value="@ViewData["User"]" />
+                <span asp-validation-for="CreateUser" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="display:none;">
+                <label asp-for="Status" class="control-label"></label>
+                <input asp-for="Status" class="form-control" value="AC" />
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
             <br />
             <div class="form-group">
                 <input type="submit" value="Agregar" class="btn btn-primary" />

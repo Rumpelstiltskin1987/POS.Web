@@ -1,10 +1,10 @@
 ﻿@model POS.Entities.Category
 
 @{
-    ViewData["Title"] = "Editar";
+    ViewData["Title"] = ViewData["txtTitle"];
 }
 
-<h1>Editar</h1>
+<h1>@ViewData["txtTitle"]</h1>
 
 <h4>Categoria</h4>
 <hr />
@@ -20,7 +20,12 @@
                 <label asp-for="Name" class="control-label">Nombre</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
-            </div>            
+            </div>
+            <div class="form-group" style="display:none;">
+                <label asp-for="LastUpdateUser" class="control-label"></label>
+                <input asp-for="LastUpdateUser" class="form-control" value="@ViewData["User"]" />
+                <span asp-validation-for="LastUpdateUser" class="text-danger"></span>
+            </div>
             <br />
             <div class="form-group">
                 <input type="submit" value="@ViewData["txtbutton"]" class="@ViewData["btn-class"]" />

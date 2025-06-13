@@ -1,10 +1,10 @@
 ﻿@model POS.Entities.Product
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = ViewData["txtTitle"];
 }
 
-<h1>Editar</h1>
+<h1>@ViewData["txtTitle"]</h1>
 
 <h4>Producto</h4>
 <hr />
@@ -26,13 +26,13 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
+@*             <div class="form-group">
                 <label asp-for="IdCategory" class="control-label">Categoría</label>
                 <input asp-for="IdCategory" class="form-control" />
                 <span asp-validation-for="IdCategory" class="text-danger"></span>
-            </div>
+            </div> *@
             <div class="form-group">
-                <label asp-for="IdCategory" class="control-label">Ubicación</label>
+                <label asp-for="IdCategory" class="control-label">Categoría</label>
                 <select asp-for="IdCategory" class="form-control" asp-items="ViewBag.Categories">
                     <option value="">Seleccione una categoría</option>
                 </select>
@@ -56,6 +56,11 @@
             <div class="form-group">
                 <label for="ProductImage" class="control-label">Imagen del Producto</label>
                 <input type="file" id="ProductImage" name="ProductImage" class="form-control" onchange="updateUrlImage()" />
+            </div>
+            <div class="form-group" style="display:none;">
+                <label asp-for="LastUpdateUser" class="control-label"></label>
+                <input asp-for="LastUpdateUser" class="form-control" value="@ViewData["User"]" />
+                <span asp-validation-for="LastUpdateUser" class="text-danger"></span>
             </div>
             <br />
             <div class="form-group">

@@ -39,24 +39,25 @@ namespace POS.Web.Controllers
                 switch (status)
                 {
                     case "AC":
-                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activos";
-                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-route-status"] = "IN";
                         ViewData["asp-button"] = "Productos Inactivos";
-                        ViewData["asp-action"] = "Edit";
+                        ViewData["option"] = "Inactivar";
                         break;
                     case "IN":
                         ViewData["txtButton"] = "Activar";
                         ViewData["txtTitle"] = "Inactivos";
-                        ViewData["asp-route"] = "AC";
+                        ViewData["asp-route-status"] = "AC";
                         ViewData["asp-button"] = "Productos Activos";
-                        ViewData["asp-action"] = "Edit";
+                        ViewData["option"] = "Activar";
                         break;
                     default:
-                        ViewData["txtButton"] = "Inactivar";
+                        ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activas";
-                        ViewData["asp-route"] = "IN";
-                        ViewData["asp-button"] = "Categorías Inactivas";
+                        ViewData["asp-route-status"] = "IN";
+                        ViewData["asp-button"] = "Productos Inactivos";
+                        ViewData["option"] = "Inactivar";
                         break;
                 }
 
@@ -69,8 +70,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }            
         }
@@ -91,8 +92,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 
@@ -113,7 +114,11 @@ namespace POS.Web.Controllers
                 .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
                 .ToList();
 
-            ViewData["Categories"] = categories; 
+            string username = User.Identity.Name ?? "DEFAULT";
+
+            ViewData["Categories"] = categories;
+            
+            ViewData["User"] = username;
 
             return View();
         }
@@ -123,7 +128,7 @@ namespace POS.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage")] Product product, IFormFile? ProductImage)
+        public async Task<IActionResult> Create([Bind("Name,Description,IdCategory,Price,MeasureUnit,UrlImage,CreateUser,Status")] Product product, IFormFile? ProductImage)
         {
             if (ModelState.IsValid)
             {
@@ -145,7 +150,7 @@ namespace POS.Web.Controllers
 
                     TempData["SuccessMessage"] = "Registro de producto exitoso";
 
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { username = product.CreateUser });
                 }
                 catch (Exception ex)
                 {
@@ -154,8 +159,8 @@ namespace POS.Web.Controllers
                         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                         Message = ex.Message,
                         Source = ex.Source,
-                        InnerExceptionMessage = ex.InnerException.Message,
-                        InnerExceptionSource = ex.InnerException.Source
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
                 }
             }
@@ -166,6 +171,7 @@ namespace POS.Web.Controllers
                 .ToList();
 
                 ViewBag.Categories = categories;
+                ViewData["User"] = product.CreateUser;  
 
                 return View(product);
             }
@@ -176,11 +182,46 @@ namespace POS.Web.Controllers
         {
             Product product = new Product();
 
-            string txtbutton = string.Empty;
-
             try
             {
+                string username = User.Identity.Name ?? "DEFAULT";
+
                 product = _manageProduct.GetById(id);
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                var categories = _manageCategory.GetAll("AC")
+                .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
+                .ToList();                
+
+                ViewBag.Categories = categories;
+                ViewData["User"] = username;
+
+                switch (option)
+                {
+                    case "Activar":
+                        product.Status = "AC";
+                        ViewData["txtbutton"] = "Activar";
+                        ViewData["btn-class"] = "btn btn-success";
+                        ViewData["txtTitle"] = "Activar";
+                        break;
+                    case "Inactivar":
+                        product.Status = "IN";
+                        ViewData["txtbutton"] = "Dar de baja";
+                        ViewData["btn-class"] = "btn btn-warning";
+                        ViewData["txtTitle"] = "Inactivar";
+                        break;
+                    default:
+                        ViewData["txtbutton"] = "Actualizar";
+                        ViewData["btn-class"] = "btn btn-primary";
+                        ViewData["txtTitle"] = "Editar";
+                        break;
+                }                
+
+                return View(product);
             }
             catch (Exception ex)
             {
@@ -189,45 +230,10 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
-            }
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                //var categories = _manageCategory.GetAll("AC")
-                //    .Select(c => new SelectListItem { Value = c.IdCategory.ToString(), Text = c.Name })
-                //    .ToList();
-
-                //ViewData["Categories"] = categories;
-
-                switch (option)
-                {
-                    case "Activar":
-                        product.Status = "AC";
-                        txtbutton = "Activar";
-                        ViewData["btn-class"] = "btn btn-success";
-                        break;
-                    case "Inactivar":
-                        product.Status = "IN";
-                        txtbutton = "Dar de baja";
-                        ViewData["btn-class"] = "btn btn-warning";
-                        break;
-                    default:
-                        txtbutton = "Actualizar";
-                        ViewData["btn-class"] = "btn btn-primary";
-                        break;
-                }
-
-                ViewData["txtbutton"] = txtbutton;
-
-                return View(product);
-            }
+            }            
         }
 
         // POST: Productos/Edit/5
@@ -255,6 +261,10 @@ namespace POS.Web.Controllers
                             await ProductImage.CopyToAsync(stream);
                         }
                     }
+
+                    TempData["SuccessMessage"] = "Actualización de categoría exitosa";
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -274,15 +284,15 @@ namespace POS.Web.Controllers
                         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                         Message = ex.Message,
                         Source = ex.Source,
-                        InnerExceptionMessage = ex.InnerException.Message,
-                        InnerExceptionSource = ex.InnerException.Source
+                        InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                        InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
-                }
-
-                return RedirectToAction(nameof(Index));
+                }                
             }
             else
             {
+                ViewData["User"] = product.LastUpdateUser;
+
                 return View(product);
             }
         }
@@ -303,8 +313,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 
@@ -334,8 +344,8 @@ namespace POS.Web.Controllers
                     RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
                     Message = ex.Message,
                     Source = ex.Source,
-                    InnerExceptionMessage = ex.InnerException.Message,
-                    InnerExceptionSource = ex.InnerException.Source
+                    InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
+                    InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                 });
             }
 
@@ -355,7 +365,6 @@ namespace POS.Web.Controllers
             catch (Exception ex)
             {
                 throw ex;
-
             }
 
             return exist;

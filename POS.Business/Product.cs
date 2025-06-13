@@ -29,9 +29,6 @@ namespace POS.Business
             {
                 try
                 {
-                    product.Status = "AC";
-                    product.CreateUser = "Alta";
-
                     _product.Add(product);
 
                     log.IdMovement = 1;
@@ -125,7 +122,6 @@ namespace POS.Business
 
                 try
                 {
-                    product.LastUpdateUser = "Update";
                     product.LastUpdateDate = DateTime.Now;
 
                     _product.Update(product);

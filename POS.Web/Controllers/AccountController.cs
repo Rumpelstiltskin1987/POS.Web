@@ -16,10 +16,16 @@ namespace POS.Controllers
     public class AccountController : Controller
     {
         private readonly MySQLiteContext _context;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(MySQLiteContext context)
+        public AccountController(MySQLiteContext context, 
+            SignInManager<ApplicationUser> signInManager, 
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         // GET: Account/Login
@@ -34,39 +40,34 @@ namespace POS.Controllers
         {
             try
             {
-                var user = await _context.ApplicationUser.FirstOrDefaultAsync(u => u.UserName == username);
 
-                if (user == null)
+                var result = await _signInManager.PasswordSignInAsync(username, password, isPersistent: false, lockoutOnFailure: false);
+
+                if (result.Succeeded)
                 {
-                    ModelState.AddModelError("", "No existe el usuario " + username);
+
+                    //var user = await _userManager.FindByNameAsync(username);
+
+                    return RedirectToAction("Index", "Home");
+                }
+                else if (result.IsLockedOut)
+                {
+                    // El usuario ha sido bloqueado (si configuraste el bloqueo en IdentityOptions)
+                    ModelState.AddModelError("", "La cuenta ha sido bloqueada debido a múltiples intentos fallidos.");
                     return View();
                 }
-
-                // Verificar la contraseña con el hasher
-                var passwordHasher = new PasswordHasher<ApplicationUser>();
-                var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-
-
-                if (result != PasswordVerificationResult.Success)
+                else if (result.IsNotAllowed)
                 {
-                    ModelState.AddModelError("", "Contraseña incorrecta.");
+                    // El inicio de sesión no está permitido (ej. cuenta no confirmada, etc.)
+                    ModelState.AddModelError("", "No se permite el inicio de sesión para este usuario.");
                     return View();
                 }
-
-                var claims = new List<Claim>
+                else // Esto cubre PasswordFailure y otras razones no específicas
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim("FullName", $"{user.FirstName} {user.LastName}"),
-                    new Claim(ClaimTypes.Email, user.Email ?? "")
-                };
-
-                var identity = new ClaimsIdentity(claims, "SmartStockAuth");                
-                var principal = new ClaimsPrincipal(identity);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-
-                return RedirectToAction("Index", "Home", new { userName = user.UserName });
+                    // Contraseña incorrecta o usuario no encontrado (para evitar enumeración de usuarios)
+                    ModelState.AddModelError("", "Intento de inicio de sesión inválido.");
+                    return View();
+                }                
             }
             catch (Exception ex)
             {
@@ -94,23 +95,44 @@ namespace POS.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingUser = await _context.ApplicationUser
-                    .AnyAsync(u => u.UserName == model.UserName);
+                //var existingUser = await _context.ApplicationUser
+                //    .AnyAsync(u => u.UserName == model.UserName);
 
-                if (existingUser)
+                var existingUser = await _userManager.FindByNameAsync(model.UserName);
+
+                if (existingUser != null)
                 {
                     ModelState.AddModelError("", "El nombre de usuario ya está en uso.");
                     return View(model);
                 }
 
                 // Hashear la contraseña antes de almacenarla
-                var passwordHasher = new PasswordHasher<ApplicationUser>();
-                model.PasswordHash = passwordHasher.HashPassword(model, model.PasswordHash);
+                //var passwordHasher = new PasswordHasher<ApplicationUser>();
+                //model.PasswordHash = passwordHasher.HashPassword(model, model.PasswordHash);
 
-                _context.ApplicationUser.Add(model);
-                await _context.SaveChangesAsync();
+                //_context.ApplicationUser.Add(model);
+                //await _context.SaveChangesAsync();
+                var user = new ApplicationUser
+                {
+                    UserName = model.UserName,
+                    Email = model.Email, // Asegúrate de que tu ApplicationUser tenga una propiedad Email
+                    FirstName = model.FirstName, // Si tienes estas propiedades personalizadas
+                    LastName = model.LastName,   //
+                    PasswordHash = model.PasswordHash // Otras propiedades que necesites
+                };
 
-                return RedirectToAction("Login");
+                var result = await _userManager.CreateAsync(user, model.PasswordHash);
+
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Login");
+                }
+
+                // Si falla, añadir los errores de Identity a ModelState
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
 
             return View(model);

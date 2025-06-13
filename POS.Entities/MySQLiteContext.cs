@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using POS.Entities;
 using System;
 
 namespace POS.Entities
 {
-    public class MySQLiteContext : DbContext
+    public class MySQLiteContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
         public MySQLiteContext(DbContextOptions<MySQLiteContext> options)
             : base(options)
@@ -13,7 +15,7 @@ namespace POS.Entities
 
 
 
-        public DbSet<ApplicationUser> ApplicationUser { get; set; }
+        //public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<Category> Category { get; set; }
         public DbSet<CategoryLog> CategoryLog { get; set; }
         public DbSet<Inventory> Inventory { get; set; }
@@ -27,21 +29,7 @@ namespace POS.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            #region User Account
-
-            modelBuilder.Entity<ApplicationUser>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.UserName).IsRequired();
-                entity.Property(e => e.PasswordHash).IsRequired();
-                entity.Property(e => e.FirstName).IsRequired();
-                entity.Property(e => e.LastName).IsRequired();
-                entity.Property(e => e.Email);
-                entity.Property(e => e.PhoneNumber);
-            });
-
-            #endregion
-
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Category>(entity =>
                     {

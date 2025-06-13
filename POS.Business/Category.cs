@@ -120,7 +120,6 @@ namespace POS.Business
             {
                 try
                 {
-                    category.LastUpdateUser = "Update";
                     category.LastUpdateDate = DateTime.Now;
 
                     _category.Update(category);
@@ -130,7 +129,7 @@ namespace POS.Business
                     log.Name = category.Name;
                     log.Status = category.Status;
                     log.MovementType = "ED";
-                    log.LastUpdateUser = "Editar";
+                    log.LastUpdateUser = category.LastUpdateUser;
 
                     _categoryLog.AddLog(log);
 

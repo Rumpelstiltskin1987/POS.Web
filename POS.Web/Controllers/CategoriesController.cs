@@ -27,22 +27,15 @@ namespace POS.Web.Controllers
             _manageCategory = new BusinessCategory(_context);
         }
 
-        // GET: Categorys
-        public async Task<IActionResult> Index(string username, string status = "AC")
+        // En el método Index, establece el valor predeterminado "DEFAULT" si User.Identity.Name es null
+        public async Task<IActionResult> Index(string status = "AC")
         {
-            if (!string.IsNullOrEmpty(username))
-            {
-                ViewData["User"] = username;
-            }
-            else
-            {
-                ViewData["User"] = "Invitado";
-            }
+            
+
+            IEnumerable<Category> categories = new List<Category>();
 
             try
             {
-                IEnumerable<Category> categories = new List<Category>();
-
                 categories = _manageCategory.GetAll(status);
 
                 switch (status)
@@ -50,23 +43,21 @@ namespace POS.Web.Controllers
                     case "AC":
                         ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activas";
-                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-route-status"] = "IN";
                         ViewData["asp-button"] = "Categorías Inactivas";
-                        ViewData["asp-action"] = "Edit";
                         ViewData["option"] = "Inactivar";
                         break;
                     case "IN":
                         ViewData["txtButton"] = "Activar";
                         ViewData["txtTitle"] = "Inactivas";
-                        ViewData["asp-route"] = "AC";
+                        ViewData["asp-route-status"] = "AC";
                         ViewData["asp-button"] = "Categorías Activas";
-                        ViewData["asp-action"] = "Edit";
                         ViewData["option"] = "Activar";
                         break;
                     default:
                         ViewData["txtButton"] = "Dar de baja";
                         ViewData["txtTitle"] = "Activas";
-                        ViewData["asp-route"] = "IN";
+                        ViewData["asp-route-status"] = "IN";
                         ViewData["asp-button"] = "Categorías Inactivas";
                         ViewData["option"] = "Inactivar";
                         break;
@@ -93,7 +84,8 @@ namespace POS.Web.Controllers
             Category category = new Category();
 
             try
-            {
+            {                
+
                 category = _manageCategory.GetById(id);
             }
             catch (Exception ex)
@@ -119,8 +111,9 @@ namespace POS.Web.Controllers
         }
 
         // GET: Categorys/Create
-        public IActionResult Create(string username)
+        public IActionResult Create()
         {
+            string username = User.Identity.Name ?? "DEFAULT";
             ViewData["User"] = username;
             return View();
         }
@@ -154,15 +147,18 @@ namespace POS.Web.Controllers
                     });
                 }
             }
-            return View(category);
+            else
+            {
+                ViewData["User"] = category.CreateUser;
+
+                return View(category);
+            }
         }
 
         // GET: Categorys/Edit/5
         public async Task<IActionResult> Edit(int id, string option)
         {
-            Category category = new Category();
-
-            string txtbutton = string.Empty;
+            Category category = new Category();            
 
             try
             {
@@ -189,21 +185,26 @@ namespace POS.Web.Controllers
             {
                 case "Activar":
                     category.Status = "AC";
-                    txtbutton = "Activar";
+                    ViewData["txtbutton"] = "Activar";
                     ViewData["btn-class"] = "btn btn-success";
-                     break;
+                    ViewData["txtTitle"] = "Activar";
+                    break;
                 case "Inactivar":
                     category.Status = "IN";
-                    txtbutton = "Dar de baja";
+                    ViewData["txtbutton"] = "Dar de baja";
                     ViewData["btn-class"] = "btn btn-warning";
+                    ViewData["txtTitle"] = "Inactivar";
                     break;
                 default:
-                    txtbutton = "Actualizar";
+                    ViewData["txtbutton"] = "Actualizar";
                     ViewData["btn-class"] = "btn btn-primary";
+                    ViewData["txtTitle"] = "Editar";
                     break;
             }
 
-            ViewData["txtbutton"] = txtbutton;
+            string username = User.Identity.Name ?? "DEFAULT";
+
+            ViewData["User"] = username;
 
             return View(category);
         }
@@ -214,20 +215,15 @@ namespace POS.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdCategory,Name,Status," +
-            "CreateUser,CreateDate")] Category category)
+            "CreateUser,CreateDate,LastUpdateUser")] Category category)
         {
-            if (id != category.IdCategory)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
                     _manageCategory.Update(category);
 
-                    TempData["SuccessMessage"] = "Actulización de categoría exitosa";
+                    TempData["SuccessMessage"] = "Actualización de categoría exitosa";
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -252,9 +248,14 @@ namespace POS.Web.Controllers
                         InnerExceptionMessage = ex.InnerException.Message ?? "No hay excepción interna",
                         InnerExceptionSource = ex.InnerException.Source ?? "No hay excepción interna"
                     });
-                }                
+                }
             }
-            return View(category);
+            else
+            {
+                ViewData["User"] = category.LastUpdateUser;
+
+                return View(category);
+            }
         }
 
         public async Task<IActionResult> Delete(int id)
@@ -315,18 +316,10 @@ namespace POS.Web.Controllers
             return _context.Category.Any(e => e.IdCategory == id);
         }
 
-        public IActionResult GetUserName()
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                var userName = User.Identity.Name;
-                return Content($"Usuario autenticado: {userName}");
-            }
-            else
-            {
-                return Content("No hay usuario autenticado");
-            }
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
     }
 }
